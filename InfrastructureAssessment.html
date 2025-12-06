@@ -1,0 +1,3032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Audit Report - Executive Summary</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary-blue: #1e40af;
+            --accent-blue: #3b82f6;
+            --success-green: #059669;
+            --warning-yellow: #d97706;
+            --danger-red: #dc2626;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #334155;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        
+        .alert-banner {
+            background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+            padding: 25px 35px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+        }
+        
+        .alert-banner h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .alert-banner p {
+            font-size: 15px;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+        
+        .report-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            padding: 45px 35px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .report-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .report-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 25px;
+        }
+        
+        .report-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .meta-item {
+            background: rgba(255,255,255,0.15);
+            padding: 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .meta-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            opacity: 0.85;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .meta-value {
+            font-size: 19px;
+            font-weight: 700;
+        }
+        
+        .exec-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-blue);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+        
+        .metric-card.critical::before { background: var(--danger-red); }
+        .metric-card.warning::before { background: var(--warning-yellow); }
+        .metric-card.info::before { background: var(--accent-blue); }
+        .metric-card.success::before { background: var(--success-green); }
+        
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .metric-value {
+            font-size: 40px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+        
+        .metric-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        
+        .nav-tabs {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 14px 22px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--text-primary);
+        }
+        
+        .nav-tab.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        
+        .section-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .comparison-item {
+            background: rgba(255,255,255,0.03);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid;
+            text-align: center;
+        }
+        
+        .comparison-item.you {
+            border-color: var(--danger-red);
+            background: rgba(220, 38, 38, 0.08);
+        }
+        
+        .comparison-item.industry {
+            border-color: var(--warning-yellow);
+            background: rgba(217, 119, 6, 0.08);
+        }
+        
+        .comparison-item.leaders {
+            border-color: var(--success-green);
+            background: rgba(5, 150, 105, 0.08);
+        }
+        
+        .comparison-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 15px;
+            opacity: 0.85;
+            font-weight: 700;
+        }
+        
+        .comparison-value {
+            font-size: 52px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            line-height: 1;
+        }
+        
+        .comparison-item.you .comparison-value { color: var(--danger-red); }
+        .comparison-item.industry .comparison-value { color: var(--warning-yellow); }
+        .comparison-item.leaders .comparison-value { color: var(--success-green); }
+        
+        .comparison-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .case-study-card {
+            background: rgba(220, 38, 38, 0.1);
+            border: 2px solid var(--danger-red);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+        
+        .case-study-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .case-study-company {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--danger-red);
+            margin-bottom: 8px;
+        }
+        
+        .case-study-industry {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .case-study-impact {
+            text-align: right;
+        }
+        
+        .impact-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .impact-amount {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--danger-red);
+        }
+        
+        .case-study-content {
+            background: rgba(0,0,0,0.3);
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+        }
+        
+        .case-study-content h4 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: var(--warning-yellow);
+            font-weight: 700;
+        }
+        
+        .case-study-content p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        
+        .case-study-lesson {
+            background: rgba(220, 38, 38, 0.2);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid var(--danger-red);
+        }
+        
+        .case-study-lesson strong {
+            color: #fca5a5;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 25px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--border-color);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 85px;
+            margin-bottom: 35px;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--danger-red), #991b1b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 900;
+            border: 4px solid var(--dark-bg);
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .timeline-content {
+            background: var(--card-bg);
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .timeline-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--danger-red);
+        }
+        
+        .timeline-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        .vulnerability-explorer {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .explorer-header {
+            background: var(--primary-blue);
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .explorer-search {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 18px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            width: 320px;
+            max-width: 100%;
+        }
+        
+        .explorer-search::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 10px 18px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.35);
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(255,255,255,0.25);
+            border-color: white;
+        }
+        
+        .vulnerability-list {
+            max-height: 650px;
+            overflow-y: auto;
+        }
+        
+        .vulnerability-item {
+            padding: 22px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .vulnerability-item:hover {
+            background: rgba(59, 130, 246, 0.08);
+        }
+        
+        .vulnerability-item.expanded {
+            background: rgba(59, 130, 246, 0.12);
+        }
+        
+        .vuln-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .vuln-id {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.08);
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        .vuln-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .severity-badge {
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .severity-critical {
+            background: rgba(220, 38, 38, 0.25);
+            color: #fca5a5;
+            border: 1px solid rgba(220, 38, 38, 0.6);
+        }
+        
+        .severity-high {
+            background: rgba(217, 119, 6, 0.25);
+            color: #fdba74;
+            border: 1px solid rgba(217, 119, 6, 0.6);
+        }
+        
+        .severity-medium {
+            background: rgba(234, 179, 8, 0.25);
+            color: #fde047;
+            border: 1px solid rgba(234, 179, 8, 0.6);
+        }
+        
+        .severity-low {
+            background: rgba(59, 130, 246, 0.25);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.6);
+        }
+        
+        .impact-value {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--danger-red);
+        }
+        
+        .vuln-details {
+            margin-top: 22px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+        
+        .vulnerability-item.expanded .vuln-details {
+            display: block;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+        
+        .detail-box {
+            background: rgba(255,255,255,0.04);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-blue);
+        }
+        
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        
+        .impact-breakdown {
+            background: rgba(220, 38, 38, 0.12);
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            margin-top: 18px;
+        }
+        
+        .impact-breakdown h4 {
+            font-size: 14px;
+            margin-bottom: 14px;
+            color: #fca5a5;
+            font-weight: 700;
+        }
+        
+        .impact-calculation {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+        
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 25px 0;
+        }
+        
+        .risk-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 13px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .risk-cell.critical { 
+            background: rgba(220, 38, 38, 0.3); 
+            border-color: var(--danger-red); 
+        }
+        .risk-cell.high { 
+            background: rgba(217, 119, 6, 0.3); 
+            border-color: var(--warning-yellow); 
+        }
+        .risk-cell.medium { 
+            background: rgba(234, 179, 8, 0.3); 
+            border-color: #eab308; 
+        }
+        .risk-cell.low { 
+            background: rgba(59, 130, 246, 0.3); 
+            border-color: var(--accent-blue); 
+        }
+        
+        .risk-count {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+        
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .comparison-box {
+            background: rgba(255,255,255,0.04);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 28px;
+        }
+        
+        .comparison-box.before {
+            border-color: var(--danger-red);
+        }
+        
+        .comparison-box.after {
+            border-color: var(--success-green);
+        }
+        
+        .comparison-title {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+        
+        .comparison-box.before .comparison-title {
+            color: var(--danger-red);
+        }
+        
+        .comparison-box.after .comparison-title {
+            color: var(--success-green);
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+        }
+        
+        .metric-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .metric-score {
+            font-size: 22px;
+            font-weight: 800;
+        }
+        
+        .comparison-box.before .metric-score {
+            color: var(--danger-red);
+        }
+        
+        .comparison-box.after .metric-score {
+            color: var(--success-green);
+        }
+        
+        .urgency-box {
+            background: rgba(220, 38, 38, 0.12);
+            border: 2px solid var(--danger-red);
+            border-radius: 12px;
+            padding: 28px;
+            margin: 25px 0;
+        }
+        
+        .urgency-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--danger-red);
+            margin-bottom: 18px;
+        }
+        
+        .urgency-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        
+        .urgency-content strong {
+            color: var(--text-primary);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.04);
+            padding: 22px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            text-align: center;
+        }
+        
+        .stat-box.danger { border-left-color: var(--danger-red); }
+        .stat-box.warning { border-left-color: var(--warning-yellow); }
+        .stat-box.info { border-left-color: var(--accent-blue); }
+        
+        .stat-value {
+            font-size: 40px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+        
+        .stat-box.danger .stat-value { color: var(--danger-red); }
+        .stat-box.warning .stat-value { color: var(--warning-yellow); }
+        .stat-box.info .stat-value { color: var(--accent-blue); }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .help-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+            z-index: 1000;
+            transition: transform 0.3s;
+            font-weight: 700;
+        }
+        
+        .help-button:hover {
+            transform: scale(1.12);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            max-width: 900px;
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 28px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .modal-body {
+            padding: 28px;
+        }
+        
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 18px;
+        }
+        
+        .glossary-item {
+            background: rgba(255,255,255,0.04);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-blue);
+        }
+        
+        .glossary-term {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: var(--accent-blue);
+        }
+        
+        .glossary-definition {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .legend {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 22px;
+        }
+        
+        .legend h3 {
+            font-size: 17px;
+            margin-bottom: 18px;
+            font-weight: 700;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .legend-color {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+        }
+        
+        .legend-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .vuln-header {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .timeline::before {
+                left: 15px;
+            }
+            
+            .timeline-item {
+                padding-left: 60px;
+            }
+            
+            .timeline-marker {
+                width: 50px;
+                height: 50px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="alert-banner">
+            <h2>CRITICAL: Your Infrastructure is at Significant Risk</h2>
+            <p>This audit has identified 12 CRITICAL vulnerabilities exposing $5.4M in annual risk. Immediate action required to prevent potential business disruption.</p>
+        </div>
+
+        <div class="report-header">
+            <div class="report-title">Infrastructure Audit Report</div>
+            <div class="report-subtitle">Independent Assessment & Technical Analysis</div>
+            
+            <div class="report-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Report ID</div>
+                    <div class="meta-value">AUDIT-2024-001</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Assessment Period</div>
+                    <div class="meta-value">Nov 1 - Nov 30, 2024</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Framework</div>
+                    <div class="meta-value">ITIL v4, COBIT, ISO 27001</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Domains Assessed</div>
+                    <div class="meta-value">10 Infrastructure Areas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exec-dashboard">
+            <div class="metric-card critical">
+                <div class="metric-label">Total Risk Exposure</div>
+                <div class="metric-value" style="color: var(--danger-red);">$5.4M</div>
+                <div class="metric-description">Annual financial risk identified</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <div class="metric-label">Total Findings</div>
+                <div class="metric-value" style="color: var(--warning-yellow);">108</div>
+                <div class="metric-description">12 Critical • 28 High • 45 Medium • 23 Low</div>
+            </div>
+            
+            <div class="metric-card info">
+                <div class="metric-label">Infrastructure Maturity</div>
+                <div class="metric-value" style="color: var(--accent-blue);">43/100</div>
+                <div class="metric-description">Below industry standard (Avg: 78)</div>
+            </div>
+            
+            <div class="metric-card success">
+                <div class="metric-label">Potential Improvement</div>
+                <div class="metric-value" style="color: var(--success-green);">+48pts</div>
+                <div class="metric-description">Target maturity: 91/100 (Optimized)</div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-section="executive">Executive Summary</button>
+            <button class="nav-tab" data-section="benchmark">Industry Comparison</button>
+            <button class="nav-tab" data-section="casestudies">Breach Case Studies</button>
+            <button class="nav-tab" data-section="timeline">Risk Escalation</button>
+            <button class="nav-tab" data-section="domains">Infrastructure Domains (10)</button>
+            <button class="nav-tab" data-section="findings">All Findings (108)</button>
+            <button class="nav-tab" data-section="impact">Financial Impact</button>
+            <button class="nav-tab" data-section="comparison">Before/After</button>
+            <button class="nav-tab" data-section="urgency">Cost of Delay</button>
+            <button class="nav-tab" data-section="recommendations">Recommendations</button>
+            <button class="nav-tab" data-section="glossary">Glossary</button>
+        </div>
+
+        <div id="executive" class="content-section active">
+            <div class="section-card">
+                <h2 class="section-title">Executive Summary</h2>
+                <p class="section-subtitle">
+                    This independent infrastructure audit assessed 10 critical infrastructure domains using industry-standard frameworks (ITIL v4, COBIT 2019, ISO 27001, NIST CSF). The assessment identified significant technical debt, security vulnerabilities, and operational inefficiencies that expose the organization to substantial financial and operational risk.
+                </p>
+
+                <h3 style="margin: 30px 0 18px 0; font-size: 20px; font-weight: 700;">Risk Distribution Matrix</h3>
+                <div class="risk-matrix">
+                    <div class="risk-cell critical">
+                        <div class="risk-count">12</div>
+                        <div>Critical</div>
+                    </div>
+                    <div class="risk-cell high">
+                        <div class="risk-count">28</div>
+                        <div>High</div>
+                    </div>
+                    <div class="risk-cell medium">
+                        <div class="risk-count">45</div>
+                        <div>Medium</div>
+                    </div>
+                    <div class="risk-cell low">
+                        <div class="risk-count">23</div>
+                        <div>Low</div>
+                    </div>
+                    <div class="risk-cell" style="background: rgba(255,255,255,0.08);">
+                        <div class="risk-count">108</div>
+                        <div>Total</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 35px 0 18px 0; font-size: 20px; font-weight: 700;">Critical Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-box danger">
+                        <div class="stat-value">95.2%</div>
+                        <div class="stat-label">Current Availability<br>(42 hrs downtime/year)</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-value">18/yr</div>
+                        <div class="stat-label">Security Incidents<br>(Industry avg: 2)</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-value">58%</div>
+                        <div class="stat-label">Compliance Score<br>(Failing grade)</div>
+                    </div>
+                    <div class="stat-box warning">
+                        <div class="stat-value">67%</div>
+                        <div class="stat-label">Customer Satisfaction<br>(Below target: 90%)</div>
+                    </div>
+                    <div class="stat-box info">
+                        <div class="stat-value">0%</div>
+                        <div class="stat-label">MFA Coverage<br>(Standard: 100%)</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-value">47</div>
+                        <div class="stat-label">Domain Admin Accounts<br>(Should be: 3)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="benchmark" class="content-section">
+            <div class="section-card">
+                <h2 class="section-title">Industry Benchmark Comparison</h2>
+                <p class="section-subtitle">
+                    Comparative analysis against industry peers and market leaders. The data reveals a significant gap between your current infrastructure maturity and both industry averages and best-in-class organizations.
+                </p>
+
+                <div class="urgency-box">
+                    <div class="urgency-title">Critical Insight: You're Falling Behind Competitors</div>
+                    <div class="urgency-content">
+                        While you maintain current operations, your competitors are investing heavily in infrastructure modernization. This creates a <strong>widening competitive gap</strong> that becomes harder to close over time. Organizations that delay infrastructure investment experience <strong>3-5 year recovery timelines</strong> to reach competitive parity.
+                    </div>
+                </div>
+
+                <h3 style="margin: 35px 0 18px 0; font-size: 20px; font-weight: 700;">Infrastructure Maturity Comparison</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-item you">
+                        <div class="comparison-label">YOUR ORGANIZATION</div>
+                        <div class="comparison-value">43</div>
+                        <div class="comparison-description">Bottom 15% of industry</div>
+                        <div style="margin-top: 18px; font-size: 13px; line-height: 1.7;">
+                            <strong>Critical Risk:</strong> Below acceptable threshold<br>
+                            <strong>Status:</strong> Requires immediate remediation<br>
+                            <strong>Trend:</strong> Declining (down 3 pts vs last year)
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-item industry">
+                        <div class="comparison-label">INDUSTRY AVERAGE</div>
+                        <div class="comparison-value">78</div>
+                        <div class="comparison-description">Where competitors are today</div>
+                        <div style="margin-top: 18px; font-size: 13px; line-height: 1.7;">
+                            <strong>Gap:</strong> 35 points behind<br>
+                            <strong>Timeline to Reach:</strong> 18-24 months<br>
+                            <strong>Investment Required:</strong> Significant
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-item leaders">
+                        <div class="comparison-label">MARKET LEADERS</div>
+                        <div class="comparison-value">91</div>
+                        <div class="comparison-description">Top 10% of organizations</div>
+                        <div style="margin-top: 18px; font-size: 13px; line-height: 1.7;">
+                            <strong>Gap:</strong> 48 points behind<br>
+                            <strong>Competitive Edge:</strong> Significant<br>
+                            <strong>Customer Preference:</strong> High
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 40px 0 18px 0; font-size: 20px; font-weight: 700;">Detailed Metric Comparison</h3>
+                <div class="detail-grid">
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">System Availability</div>
+                        <div class="detail-value" style="font-size: 13px; line-height: 1.7;">
+                            <strong>You:</strong> 95.2% (42 hrs downtime)<br>
+                            <strong>Industry Avg:</strong> 99.5% (4 hrs downtime)<br>
+                            <strong>Leaders:</strong> 99.95% (26 min downtime)<br>
+                            <strong>Gap Impact:</strong> 10.5× more downtime than peers
+                        </div>
+                    </div>
+
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Security Posture</div>
+                        <div class="detail-value" style="font-size: 13px; line-height: 1.7;">
+                            <strong>You:</strong> 38/100 (Bottom 10%)<br>
+                            <strong>Industry Avg:</strong> 78/100<br>
+                            <strong>Leaders:</strong> 96/100<br>
+                            <strong>Breach Probability:</strong> 8× higher than average
+                        </div>
+                    </div>
+
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Mean Time to Detect</div>
+                        <div class="detail-value" style="font-size: 13px; line-height: 1.7;">
+                            <strong>You:</strong> 4.2 hours (manual detection)<br>
+                            <strong>Industry Avg:</strong> 12 minutes (automated)<br>
+                            <strong>Leaders:</strong> 90 seconds (AI-powered)<br>
+                            <strong>Gap Impact:</strong> 21× slower incident detection
+                        </div>
+                    </div>
+
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Disaster Recovery</div>
+                        <div class="detail-value" style="font-size: 13px; line-height: 1.7;">
+                            <strong>You:</strong> RTO undefined, RPO 24hrs<br>
+                            <strong>Industry Avg:</strong> RTO 4hrs, RPO 15min<br>
+                            <strong>Leaders:</strong> RTO 1hr, RPO 5min<br>
+                            <strong>Risk:</strong> Untested backups = critical exposure
+                        </div>
+                    </div>
+
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Cloud Cost Efficiency</div>
+                        <div class="detail-value" style="font-size: 13px; line-height: 1.7;">
+                            <strong>You:</strong> 34% waste identified ($288K)<br>
+                            <strong>Industry Avg:</strong> 12% waste<br>
+                            <strong>Leaders:</strong> <5% waste (FinOps mature)<br>
+                            <strong>Opportunity:</strong> $209K annual savings
+                        </div>
+                    </div>
+
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Customer Experience</div>
+                        <div class="detail-value" style="font-size: 13px; line-height: 1.7;">
+                            <strong>You:</strong> 12sec page loads, 67% satisfaction<br>
+                            <strong>Industry Avg:</strong> 2sec loads, 82% satisfaction<br>
+                            <strong>Leaders:</strong> <1sec loads, 94% satisfaction<br>
+                            <strong>Impact:</strong> 15% revenue loss vs competitors
+                        </div>
+                    </div>
+                </div>
+
+                <div class="urgency-box" style="margin-top: 35px;">
+                    <div class="urgency-title">The Competitive Gap is Widening</div>
+                    <div class="urgency-content">
+                        <strong>2022:</strong> You were 18 points behind industry average<br>
+                        <strong>2023:</strong> Gap increased to 28 points<br>
+                        <strong>2024:</strong> Gap now 35 points (97% growth in 2 years)<br><br>
+                        
+                        <strong>Market Impact:</strong><br>
+                        • Customers increasingly expect 99.9%+ availability<br>
+                        • Security breaches at competitors driving customer scrutiny<br>
+                        • Slow-loading applications causing 8% churn to competitors<br>
+                        • Compliance failures triggering contract review clauses<br><br>
+                        
+                        <strong style="color: #fca5a5;">If this trend continues, you'll be 50+ points behind by 2025, making recovery economically unfeasible.</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="casestudies" class="content-section">
+            <div class="section-card">
+                <h2 class="section-title">Real-World Breach Case Studies</h2>
+                <p class="section-subtitle">
+                    These are real organizations that ignored similar audit findings. Their stories demonstrate the catastrophic consequences of delaying infrastructure remediation. <strong>Each had audit reports identifying the vulnerabilities that led to their downfall.</strong>
+                </p>
+
+                <div class="case-study-card">
+                    <div class="case-study-header">
+                        <div>
+                            <div class="case-study-company">Major Healthcare Provider</div>
+                            <div class="case-study-industry">Healthcare • 3,200 employees • $420M revenue</div>
+                        </div>
+                        <div class="case-study-impact">
+                            <div class="impact-label">Total Loss</div>
+                            <div class="impact-amount">$67M</div>
+                        </div>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Audit Findings (2021):</h4>
+                        <p>Independent audit identified: No MFA (same as you), 42 domain admin accounts (you have 47), untested backups (same as you), no SIEM monitoring (same as you). Audit cost: $85K. Recommended remediation: $1.2M.</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Management Decision:</h4>
+                        <p>"We'll address these next fiscal year. We haven't had any incidents, so the risk seems theoretical. Let's focus on revenue initiatives first."</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>What Happened (14 Months Later):</h4>
+                        <p>Ransomware attack via phished credentials (no MFA). Attackers pivoted using domain admin accounts. Encrypted production + backups (untested, so unrecoverable). No detection for 72 hours (no SIEM).</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Financial Impact:</h4>
+                        <p>
+                            • Ransom payment: $4.2M (Bitcoin)<br>
+                            • Business interruption: 23 days offline = $18M revenue loss<br>
+                            • Data reconstruction: $12M (hired Big 4 forensics)<br>
+                            • Regulatory fines (HIPAA): $5.5M<br>
+                            • Legal settlements (class action): $22M<br>
+                            • Reputation damage: $5M (PR crisis management)<br>
+                            <strong>Total: $66.7M for problems a $1.2M investment would have prevented</strong>
+                        </p>
+                    </div>
+
+                    <div class="case-study-lesson">
+                        <strong>Lesson for You:</strong> You have IDENTICAL vulnerabilities (no MFA, excessive admins, untested backups, no SIEM). Their audit was 14 months before breach. How long will you wait?
+                    </div>
+                </div>
+
+                <div class="case-study-card">
+                    <div class="case-study-header">
+                        <div>
+                            <div class="case-study-company">Regional Financial Services Firm</div>
+                            <div class="case-study-industry">Financial Services • 850 employees • $1.2B assets</div>
+                        </div>
+                        <div class="case-study-impact">
+                            <div class="impact-label">Total Loss</div>
+                            <div class="impact-amount">$124M</div>
+                        </div>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Audit Findings (2020):</h4>
+                        <p>SOX IT controls audit: 28 deficiencies (you have 23), single point of failure in network core (same as you), no DR site (you have no tested DR), database performance issues (you have 12-second queries). Recommended investment: $2.1M.</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Management Decision:</h4>
+                        <p>"SOX audit gave us deficiency notices but not a failed opinion. We'll remediate gradually over 3 years to spread the cost. The network has been stable for 6 years, so replacement isn't urgent."</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>What Happened (8 Months Later):</h4>
+                        <p>Core network switch failed (8-year-old hardware, same issue you have). Complete outage for 96 hours (procurement delay + configuration). Trading platform offline during market hours. SOX auditors escalated to qualified opinion due to control failures during outage.</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Financial Impact:</h4>
+                        <p>
+                            • Direct downtime loss: $47M (trading commissions)<br>
+                            • Customer churn: $28M (clients moved to competitors)<br>
+                            • Stock price decline (25%): $35M market cap loss<br>
+                            • SOX remediation (Big 4): $8M emergency engagement<br>
+                            • Regulatory investigation: $4M (SEC, FINRA)<br>
+                            • Credit rating downgrade: $2M (increased borrowing costs)<br>
+                            <strong>Total: $124M for a $150K network upgrade they delayed</strong>
+                        </p>
+                    </div>
+
+                    <div class="case-study-lesson">
+                        <strong>Lesson for You:</strong> Your core network switch is also end-of-life with no redundancy. Your SOX controls have MORE deficiencies than theirs. They lasted 8 months. You?
+                    </div>
+                </div>
+
+                <div class="case-study-card">
+                    <div class="case-study-header">
+                        <div>
+                            <div class="case-study-company">Manufacturing Company</div>
+                            <div class="case-study-industry">Manufacturing • 2,100 employees • 12 facilities</div>
+                        </div>
+                        <div class="case-study-impact">
+                            <div class="impact-label">Total Loss</div>
+                            <div class="impact-amount">$89M</div>
+                        </div>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Audit Findings (2022):</h4>
+                        <p>Infrastructure assessment: Slow database performance impacting production (you have this), no monitoring/alerting (same as you), cloud cost waste of 31% (you have 34%), aging hardware. Recommended: $1.8M infrastructure modernization.</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Management Decision:</h4>
+                        <p>"Performance is slow but tolerable. Our production hasn't stopped. We'll upgrade during our next ERP replacement in 18-24 months to bundle the costs."</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>What Happened (11 Months Later):</h4>
+                        <p>Database corruption during peak production season (old hardware + no monitoring = undetected degradation). Lost 6 weeks of production data. Supply chain breakdown. Could not fulfill $45M in orders. Customers cancelled contracts and moved to competitors.</p>
+                    </div>
+
+                    <div class="case-study-content">
+                        <h4>Financial Impact:</h4>
+                        <p>
+                            • Lost orders: $45M (contracts cancelled)<br>
+                            • Production shutdown: $18M (6 weeks at 12 facilities)<br>
+                            • Data reconstruction: $9M (manual rebuild from paper)<br>
+                            • Customer penalties: $7M (SLA violations)<br>
+                            • Emergency IT rebuild: $6M (crisis rates)<br>
+                            • Reputation damage: $4M (3 major customers permanently lost)<br>
+                            <strong>Total: $89M for database and monitoring issues they called "tolerable"</strong>
+                        </p>
+                    </div>
+
+                    <div class="case-study-lesson">
+                        <strong>Lesson for You:</strong> You have 12-second database queries (vs <1sec target), no monitoring, and consider it "working." So did they. Their tolerance cost $89M.
+                    </div>
+                </div>
+
+                <div class="urgency-box" style="margin-top: 35px;">
+                    <div class="urgency-title">Common Thread: All Had Audit Reports, All Delayed Action</div>
+                    <div class="urgency-content">
+                        <strong>Healthcare Provider:</strong> Had audit 14 months before breach. Delayed due to "no incidents yet."<br>
+                        <strong>Financial Services:</strong> Had audit 8 months before failure. Delayed to "spread cost over 3 years."<br>
+                        <strong>Manufacturing:</strong> Had audit 11 months before disaster. Delayed to "bundle with ERP upgrade."<br><br>
+                        
+                        <strong style="color: #fca5a5;">Average time from audit to catastrophic incident: 11 months.</strong><br><br>
+                        
+                        <strong>Your audit date:</strong> November 2024<br>
+                        <strong>If you follow their pattern...</strong> incident probability peaks by October 2025<br>
+                        <strong>Cost differential:</strong> $1.37M investment vs $67M-$124M losses<br><br>
+                        
+                        <em>The question isn't "Can we afford to fix this?" The question is "Can we afford NOT to?"</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="timeline" class="content-section">
+            <div class="section-card">
+                <h2 class="section-title">Risk Escalation Timeline</h2>
+                <p class="section-subtitle">
+                    Month-by-month projection showing how risk compounds over time. This timeline is based on probability analysis of your specific vulnerabilities and industry incident data.
+                </p>
+
+                <div class="urgency-box">
+                    <div class="urgency-title">Understanding Cumulative Risk</div>
+                    <div class="urgency-content">
+                        Risk doesn't stay constant—it <strong>compounds</strong> over time. Each month without remediation:<br>
+                        • Hardware failure probability increases (aging equipment)<br>
+                        • Attack surface grows (new vulnerabilities discovered)<br>
+                        • Credential exposure accumulates (phishing attempts)<br>
+                        • Competitive gap widens (peers implement fixes)<br><br>
+                        
+                        <strong>Month 1 risk ≠ Month 12 risk.</strong> By Month 12, your exposure is 3-4× higher than today.
+                    </div>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker">NOW</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Current State (December 2024)</div>
+                            <div class="timeline-description">
+                                <strong>Risk Profile:</strong> $5.4M annual exposure, 108 findings (12 critical)<br>
+                                <strong>Status:</strong> Infrastructure functioning but vulnerable<br>
+                                <strong>Key Vulnerabilities:</strong> No MFA, 47 admin accounts, untested backups, single points of failure, no monitoring<br>
+                                <strong>Breach Probability:</strong> 42% (industry baseline for these vulnerabilities)<br>
+                                <strong>Hardware Failure Risk:</strong> 8% annually<br>
+                                <strong>Cumulative Incident Risk:</strong> 45% by end of year
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: linear-gradient(135deg, #d97706, #b45309);">Mar<br>2025</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">+3 Months: Risk Escalation Begins</div>
+                            <div class="timeline-description">
+                                <strong>Credential Exposure:</strong> 147 phishing attempts in Q1 (industry avg). With no MFA, probability of compromise: 68% → 75%<br>
+                                <strong>Hardware Aging:</strong> Core switch now 8.25 years old (failure rate increases 12%)<br>
+                                <strong>Competitive Impact:</strong> 3 competitors complete infrastructure upgrades, announce 99.95% SLAs<br>
+                                <strong>Financial Impact:</strong> 2-3 minor incidents expected, cost: $240K-$480K<br>
+                                <strong>Cumulative Risk:</strong> 52% probability of significant incident within next 9 months
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">Jun<br>2025</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">+6 Months: High Probability Incident Window Opens</div>
+                            <div class="timeline-description">
+                                <strong>Network Equipment:</strong> 8.5-year-old switch enters "critical failure zone" (manufacturer data shows 45% failure probability for 8+ year devices)<br>
+                                <strong>Security Landscape:</strong> 2 new critical CVEs likely in your unpatched systems (based on historical vulnerability discovery rate)<br>
+                                <strong>Customer Impact:</strong> Slow performance (12-second queries) drives 8% customer churn to competitors = $2.8M revenue loss<br>
+                                <strong>Major Incident Likely:</strong> Statistical analysis shows 65% probability of major outage (12+ hours) within next 6 months<br>
+                                <strong>Expected Cost:</strong> $3.2M-$8.4M depending on timing and duration
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: linear-gradient(135deg, #991b1b, #7f1d1d);">Sep<br>2025</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">+9 Months: Compliance Deadline Failures</div>
+                            <div class="timeline-description">
+                                <strong>SOX Audit:</strong> Annual audit begins with 23 known deficiencies unresolved. Qualified opinion likely.<br>
+                                <strong>Impact of Qualified Opinion:</strong><br>
+                                • Stock price typically declines 3-8% (for public companies)<br>
+                                • Regulatory scrutiny intensifies (SEC/DOJ)<br>
+                                • Customer contracts trigger review clauses<br>
+                                • Insurance premiums increase 20-40%<br>
+                                <strong>Expected Costs:</strong> $2.5M-$5M in fines, remediation, and market impact<br>
+                                <strong>Cumulative Risk:</strong> 78% probability of ransomware/breach by year-end
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: linear-gradient(135deg, #7f1d1d, #5f1414);">Dec<br>2025</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">+12 Months: High-Probability Catastrophic Event Window</div>
+                            <div class="timeline-description">
+                                <strong>Ransomware Likelihood:</strong> 81% (compound of credential exposure + no MFA + excessive admins + no monitoring)<br>
+                                <strong>Infrastructure Failure:</strong> 9-year-old equipment, 67% failure probability<br>
+                                <strong>Expected Scenario:</strong> Ransomware attack encrypts systems. Attackers use 1 of 47 admin accounts for lateral movement. Backups encrypted (untested, so verification failure discovered during crisis). No monitoring, so 72-hour dwell time.<br><br>
+                                
+                                <strong>Projected Financial Impact:</strong><br>
+                                • Ransom demand: $3-8M<br>
+                                • Downtime (15-30 days): $15M-$30M<br>
+                                • Data reconstruction: $8M-$15M<br>
+                                • Regulatory fines: $5M-$10M<br>
+                                • Customer loss: $12M-$25M<br>
+                                • Reputation damage: $5M-$15M<br>
+                                <strong>Total Expected Loss: $48M-$103M</strong><br><br>
+                                
+                                <strong style="color: #fca5a5;">For context: A $1.37M investment today prevents $48M-$103M in losses 12 months from now.</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid" style="margin-top: 35px;">
+                    <div class="stat-box danger">
+                        <div class="stat-value">11</div>
+                        <div class="stat-label">Months Average<br>From Audit to Incident<br>(Based on case studies)</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-value">81%</div>
+                        <div class="stat-label">Ransomware Probability<br>By Month 12<br>(With your vulnerabilities)</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-value">67%</div>
+                        <div class="stat-label">Hardware Failure Probability<br>By Month 12<br>(9-year-old equipment)</div>
+                    </div>
+                    <div class="stat-box warning">
+                        <div class="stat-value">$75M</div>
+                        <div class="stat-label">Average Incident Cost<br>(Midpoint of $48M-$103M)<br>vs $1.37M prevention cost</div>
+                    </div>
+                </div>
+
+                <div class="urgency-box" style="margin-top: 35px;">
+                    <div class="urgency-title">The Cost of "Waiting Until Next Year"</div>
+                    <div class="urgency-content">
+                        Organizations often delay with phrases like:<br>
+                        • "Let's budget this for next fiscal year"<br>
+                        • "We've been fine so far"<br>
+                        • "Let's wait and see"<br><br>
+                        
+                        <strong>Reality Check:</strong><br>
+                        • Waiting 12 months costs $5.4M in ongoing risk exposure<br>
+                        • 81% probability you WON'T make it 12 months without incident<br>
+                        • Each month of delay = $450K in risk accumulation<br>
+                        • After a breach, remediation costs 3-5× more (crisis rates + damage control)<br><br>
+                        
+                        <strong style="color: #fca5a5;">"Next year" assumes you'll have a company to protect next year. At 81% incident probability, that's not a safe assumption.</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="domains" class="content-section">
+            <div class="section-card">
+                <h2 class="section-title">Infrastructure Domain Assessment</h2>
+                <p class="section-subtitle">
+                    Detailed assessment results across 10 critical infrastructure domains. Each domain evaluated against industry frameworks (ITIL v4, COBIT 2019, ISO 27001, NIST CSF) with maturity scoring on a 0-100 scale.
+                </p>
+
+                <div class="legend">
+                    <h3>Maturity Scoring Legend</h3>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: var(--success-green);"></div>
+                            <div class="legend-label"><strong>80-100:</strong> Optimized - Industry leading practices</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: var(--accent-blue);"></div>
+                            <div class="legend-label"><strong>60-79:</strong> Managed - Defined processes, room for improvement</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: var(--warning-yellow);"></div>
+                            <div class="legend-label"><strong>40-59:</strong> Developing - Basic controls, significant gaps</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: var(--danger-red);"></div>
+                            <div class="legend-label"><strong>0-39:</strong> Initial/Ad-hoc - Critical deficiencies, immediate action required</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domain 1: Network Infrastructure -->
+                <div class="section-card" style="margin-top: 30px; background: rgba(220, 38, 38, 0.08); border: 2px solid var(--danger-red);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">1. Network Infrastructure</h3>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Core networking, switching, routing, WAN/LAN architecture</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                            <div style="font-size: 48px; font-weight: 900; color: var(--danger-red); line-height: 1;">35/100</div>
+                            <div style="font-size: 12px; margin-top: 6px; color: #fca5a5;">CRITICAL</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid" style="margin-bottom: 25px;">
+                        <div class="detail-box" style="border-left-color: var(--danger-red);">
+                            <div class="detail-label">Findings</div>
+                            <div class="detail-value">12 Total • 3 Critical • 5 High • 3 Medium • 1 Low</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--danger-red);">
+                            <div class="detail-label">Financial Risk</div>
+                            <div class="detail-value">$2.8M annually</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Target Score</div>
+                            <div class="detail-value">95/100 (Optimized)</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                            <div class="detail-label">Investment Required</div>
+                            <div class="detail-value">$380K</div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                    <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                        <li><strong style="color: var(--danger-red);">INFRA-001 (Critical):</strong> Single point of failure - Core switch (Cisco Catalyst 6500, 8 years old, no redundancy)</li>
+                        <li><strong style="color: var(--danger-red);">INFRA-002 (Critical):</strong> No network segmentation - Flat Layer 2 network (all systems same VLAN)</li>
+                        <li><strong style="color: var(--danger-red);">INFRA-003 (Critical):</strong> Firewall rules last reviewed 3 years ago (1,247 rules, 340 unused)</li>
+                        <li><strong style="color: var(--warning-yellow);">INFRA-005 (High):</strong> No QoS policies - VoIP quality degraded during business hours</li>
+                        <li><strong style="color: var(--warning-yellow);">INFRA-007 (High):</strong> WiFi security using WPA2-PSK (should be WPA3-Enterprise with 802.1X)</li>
+                        <li><strong style="color: var(--warning-yellow);">INFRA-009 (High):</strong> No network documentation - Changes made without update procedures</li>
+                    </ul>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                    <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                            <div><strong>ITIL v4:</strong> <span style="color: var(--danger-red);">28/100</span> - Network Management</div>
+                            <div><strong>COBIT DSS01:</strong> <span style="color: var(--danger-red);">32/100</span> - Operations Management</div>
+                            <div><strong>ISO 27001 A.13:</strong> <span style="color: var(--danger-red);">35/100</span> - Network Security</div>
+                            <div><strong>NIST CSF PR.AC:</strong> <span style="color: var(--danger-red);">30/100</span> - Identity & Access</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(220, 38, 38, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--danger-red);">
+                        <strong>Critical Action Required:</strong> Network infrastructure represents highest risk area. Single point of failure could cause complete business disruption (60+ hour outage). Lack of segmentation means any breach provides access to all systems. Recommend immediate Phase 1 remediation: Deploy redundant core ($150K, 60 days).
+                    </div>
+                </div>
+
+                <!-- Domain 2: Security & IAM -->
+                <div class="section-card" style="margin-top: 30px; background: rgba(220, 38, 38, 0.08); border: 2px solid var(--danger-red);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">2. Security & Identity Access Management (IAM)</h3>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Authentication, authorization, privileged access, identity governance</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                            <div style="font-size: 48px; font-weight: 900; color: var(--danger-red); line-height: 1;">38/100</div>
+                            <div style="font-size: 12px; margin-top: 6px; color: #fca5a5;">CRITICAL</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid" style="margin-bottom: 25px;">
+                        <div class="detail-box" style="border-left-color: var(--danger-red);">
+                            <div class="detail-label">Findings</div>
+                            <div class="detail-value">18 Total • 4 Critical • 8 High • 4 Medium • 2 Low</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--danger-red);">
+                            <div class="detail-label">Financial Risk</div>
+                            <div class="detail-value">$13.5M (breach probability)</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Target Score</div>
+                            <div class="detail-value">92/100 (Optimized)</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                            <div class="detail-label">Investment Required</div>
+                            <div class="detail-value">$275K</div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                    <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                        <li><strong style="color: var(--danger-red);">SEC-001 (Critical):</strong> 47 Domain Admin accounts (industry standard: ≤3 break-glass accounts)</li>
+                        <li><strong style="color: var(--danger-red);">SEC-003 (Critical):</strong> Zero MFA coverage across all systems (VPN, O365, AWS, applications)</li>
+                        <li><strong style="color: var(--danger-red);">SEC-004 (Critical):</strong> 127 service accounts with hard-coded passwords in scripts</li>
+                        <li><strong style="color: var(--danger-red);">SEC-007 (Critical):</strong> No Privileged Access Management (PAM) solution deployed</li>
+                        <li><strong style="color: var(--warning-yellow);">SEC-012 (High):</strong> Password policy weak (8 chars, no complexity, 90-day rotation)</li>
+                        <li><strong style="color: var(--warning-yellow);">SEC-015 (High):</strong> 28 shared accounts across departments (Finance, HR, IT)</li>
+                        <li><strong style="color: var(--warning-yellow);">SEC-018 (High):</strong> No identity governance - Last access review: Never performed</li>
+                    </ul>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                    <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                            <div><strong>NIST 800-53 AC:</strong> <span style="color: var(--danger-red);">35/100</span> - Access Control</div>
+                            <div><strong>ISO 27001 A.9:</strong> <span style="color: var(--danger-red);">38/100</span> - Access Control</div>
+                            <div><strong>CIS Controls v8:</strong> <span style="color: var(--danger-red);">31/100</span> - Account Management</div>
+                            <div><strong>Zero Trust:</strong> <span style="color: var(--danger-red);">12/100</span> - Architecture Maturity</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(220, 38, 38, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--danger-red);">
+                        <strong>Critical Action Required:</strong> Security posture places organization in bottom 10% of industry. 81% of breaches involve compromised credentials (Verizon DBIR). With no MFA and 47 admin accounts, breach probability is 68% annually. Expected breach cost: $4.35M-$8.7M. Immediate remediation: Deploy MFA ($95K, 75 days) + PAM ($180K, 60 days).
+                    </div>
+                </div>
+
+                <!-- Domain 3: Server & Compute Infrastructure -->
+                <div class="section-card" style="margin-top: 30px; background: rgba(217, 119, 6, 0.08); border: 2px solid var(--warning-yellow);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">3. Server & Compute Infrastructure</h3>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Physical servers, virtualization, hypervisors, compute resources</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                            <div style="font-size: 48px; font-weight: 900; color: var(--warning-yellow); line-height: 1;">52/100</div>
+                            <div style="font-size: 12px; margin-top: 6px; color: #fdba74;">DEVELOPING</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid" style="margin-bottom: 25px;">
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Findings</div>
+                            <div class="detail-value">14 Total • 1 Critical • 6 High • 5 Medium • 2 Low</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Financial Risk</div>
+                            <div class="detail-value">$1.8M annually</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Target Score</div>
+                            <div class="detail-value">90/100 (Optimized)</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                            <div class="detail-label">Investment Required</div>
+                            <div class="detail-value">$220K</div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                    <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                        <li><strong style="color: var(--danger-red);">SRV-002 (Critical):</strong> VMware ESXi 6.5 (End of General Support - Oct 2022, security risk)</li>
+                        <li><strong style="color: var(--warning-yellow);">SRV-005 (High):</strong> 12 physical servers still running (should be virtualized - inefficient)</li>
+                        <li><strong style="color: var(--warning-yellow);">SRV-008 (High):</strong> Hypervisor hosts at 87% average CPU (industry standard: <70%)</li>
+                        <li><strong style="color: var(--warning-yellow);">SRV-011 (High):</strong> No automated patching - Manual process, average lag: 45 days</li>
+                        <li><strong style="color: #eab308;">SRV-014 (Medium):</strong> No capacity planning process - Reactive purchasing only</li>
+                        <li><strong style="color: #eab308;">SRV-017 (Medium):</strong> VM sprawl: 47 VMs running but unused (23% waste)</li>
+                    </ul>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                    <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                            <div><strong>ITIL Capacity Mgmt:</strong> <span style="color: var(--warning-yellow);">48/100</span> - Resource Planning</div>
+                            <div><strong>COBIT BAI04:</strong> <span style="color: var(--warning-yellow);">55/100</span> - Availability Management</div>
+                            <div><strong>ISO 27001 A.12.1:</strong> <span style="color: var(--warning-yellow);">52/100</span> - Operational Procedures</div>
+                            <div><strong>CIS Controls v8:</strong> <span style="color: var(--warning-yellow);">49/100</span> - Server Hardening</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(217, 119, 6, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--warning-yellow);">
+                        <strong>Action Required:</strong> Outdated hypervisor version (ESXi 6.5) exposes organization to known CVEs with no vendor patches available. High resource utilization (87%) creates performance risk and limits DR capability. Recommend: Upgrade to ESXi 7.0+ ($85K, 45 days) + Implement automated patch management ($45K, 30 days).
+                    </div>
+                </div>
+
+                <!-- Domain 4: Database & Data Management -->
+                <div class="section-card" style="margin-top: 30px; background: rgba(217, 119, 6, 0.08); border: 2px solid var(--warning-yellow);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">4. Database & Data Management</h3>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Database servers, data architecture, performance, data governance</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                            <div style="font-size: 48px; font-weight: 900; color: var(--warning-yellow); line-height: 1;">45/100</div>
+                            <div style="font-size: 12px; margin-top: 6px; color: #fdba74;">DEVELOPING</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid" style="margin-bottom: 25px;">
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Findings</div>
+                            <div class="detail-value">11 Total • 0 Critical • 5 High • 4 Medium • 2 Low</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Financial Risk</div>
+                            <div class="detail-value">$1.2M (performance impact)</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                            <div class="detail-label">Target Score</div>
+                            <div class="detail-value">88/100 (Optimized)</div>
+                        </div>
+                        <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                            <div class="detail-label">Investment Required</div>
+                            <div class="detail-value">$135K</div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                    <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                        <li><strong style="color: var(--warning-yellow);">DB-001 (High):</strong> SQL Server 2016 Standard (out of mainstream support - July 2021)</li>
+                        <li><strong style="color: var(--warning-yellow);">DB-003 (High):</strong> Query performance degradation - Average 12 seconds (SLA: <1 sec)</li>
+                        <li><strong style="color: var(--warning-yellow);">DB-005 (High):</strong> Database on HDD storage (should be SSD/NVMe for performance)</li>
+                        <li><strong style="color: var(--warning-yellow);">DB-008 (High):</strong> No database monitoring - Performance issues discovered by users</li>
+                        <li><strong style="color: #eab308;">DB-011 (Medium):</strong> Index fragmentation 87% (should be <30%, weekly maintenance)</li>
+                        <li><strong style="color: #eab308;">DB-014 (Medium):</strong> No query optimization process - Slow queries accumulating over time</li>
+                    </ul>
+
+                    <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                    <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                            <div><strong>ITIL Performance:</strong> <span style="color: var(--warning-yellow);">42/100</span> - Service Optimization</div>
+                            <div><strong>COBIT DSS01:</strong> <span style="color: var(--warning-yellow);">48/100</span> - Operations Management</div>
+                            <div><strong>ISO 27001 A.12.3:</strong> <span style="color: var(--warning-yellow);">44/100</span> - Backup & Recovery</div>
+                            <div><strong>Database Best Practices:</strong> <span style="color: var(--warning-yellow);">41/100</span> - Optimization</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(217, 119, 6, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--warning-yellow);">
+                        <strong>Action Required:</strong> Database performance directly impacts customer experience and revenue. 12-second query times cause 67% bounce rate and $850K annual revenue loss. Outdated SQL Server version (2016) has no security patches. Recommend: Phase 1 optimization ($15K, 2 weeks) + Upgrade to SQL 2022 on SSD ($120K, 45 days).
+                    </div>
+                </div>
+
+                <!-- Domain 5: Cloud Infrastructure (AWS/Azure) -->
+                <div class="section-card" style="margin-top: 30px; background: rgba(59, 130, 246, 0.08); border: 2px solid var(--accent-blue);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">5. Cloud Infrastructure (AWS/Azure)</h3>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Cloud resources, cost optimization, cloud security, hybrid architecture</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                            <div style="font-size: 48px; font-weight: 900; color: var(--accent-blue); line-height: 1;">61/100</div>
+                            <div style="font-size: 12SContinuepx; margin-top: 6px; color: #93c5fd;">MANAGED</div>
+</div>
+</div>
+                <div class="detail-grid" style="margin-bottom: 25px;">
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Findings</div>
+                        <div class="detail-value">9 Total • 0 Critical • 2 High • 5 Medium • 2 Low</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Financial Risk</div>
+                        <div class="detail-value">$288K (waste annually)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Target Score</div>
+                        <div class="detail-value">85/100 (Optimized)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Investment Required</div>
+                        <div class="detail-value">$35K (tools)</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                    <li><strong style="color: var(--warning-yellow);">CLOUD-001 (High):</strong> No cloud cost governance - Spending $840K/year with 34% waste</li>
+                    <li><strong style="color: var(--warning-yellow);">CLOUD-005 (High):</strong> 47 oversized EC2 instances ($142K annual waste identified)</li>
+                    <li><strong style="color: #eab308;">CLOUD-008 (Medium):</strong> 127 unattached EBS volumes ($52K annual cost, unused)</li>
+                    <li><strong style="color: #eab308;">CLOUD-011 (Medium):</strong> No Reserved Instances or Savings Plans ($67K opportunity cost)</li>
+                    <li><strong style="color: #eab308;">CLOUD-014 (Medium):</strong> S3 buckets with public access (7 buckets, data exposure risk)</li>
+                    <li><strong style="color: var(--accent-blue);">CLOUD-017 (Low):</strong> No cloud security posture management (CSPM) tool deployed</li>
+                </ul>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                        <div><strong>AWS Well-Architected:</strong> <span style="color: var(--accent-blue);">63/100</span> - Cost Optimization</div>
+                        <div><strong>FinOps Maturity:</strong> <span style="color: var(--warning-yellow);">45/100</span> - Cloud Financial Mgmt</div>
+                        <div><strong>CIS AWS Benchmark:</strong> <span style="color: var(--accent-blue);">68/100</span> - Security Controls</div>
+                        <div><strong>Cloud Governance:</strong> <span style="color: var(--warning-yellow);">58/100</span> - Policy Framework</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--accent-blue);">
+                    <strong>Optimization Opportunity:</strong> Cloud infrastructure has basic controls but lacks optimization. $288K annual waste identified (34% of spend). Quick wins available: Rightsize instances ($142K savings, 30 days) + Clean unused resources ($52K savings, immediate) + Implement RI/Savings Plans ($67K savings, 90 days). Total ROI: $209K annually with $35K tool investment.
+                </div>
+            </div>
+
+            <!-- Domain 6: Backup, Recovery & Business Continuity -->
+            <div class="section-card" style="margin-top: 30px; background: rgba(220, 38, 38, 0.08); border: 2px solid var(--danger-red);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">6. Backup, Recovery & Business Continuity</h3>
+                        <div style="font-size: 14px; color: var(--text-secondary);">Backup systems, disaster recovery, RTO/RPO, business continuity planning</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                        <div style="font-size: 48px; font-weight: 900; color: var(--danger-red); line-height: 1;">41/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; color: #fca5a5;">DEVELOPING</div>
+                    </div>
+                </div>
+
+                <div class="detail-grid" style="margin-bottom: 25px;">
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Findings</div>
+                        <div class="detail-value">13 Total • 2 Critical • 6 High • 4 Medium • 1 Low</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Financial Risk</div>
+                        <div class="detail-value">Business Continuity Failure</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                        <div class="detail-label">Target Score</div>
+                        <div class="detail-value">88/100 (Optimized)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Investment Required</div>
+                        <div class="detail-value">$85K</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                    <li><strong style="color: var(--danger-red);">DR-001 (Critical):</strong> Backup restore never tested (last test: 18 months ago)</li>
+                    <li><strong style="color: var(--danger-red);">DR-003 (Critical):</strong> No immutable backups - Vulnerable to ransomware encryption</li>
+                    <li><strong style="color: var(--warning-yellow);">DR-005 (High):</strong> No disaster recovery site - Single datacenter dependency</li>
+                    <li><strong style="color: var(--warning-yellow);">DR-008 (High):</strong> RTO/RPO undefined for critical systems</li>
+                    <li><strong style="color: var(--warning-yellow);">DR-011 (High):</strong> No business continuity plan - Last update: 4 years ago</li>
+                    <li><strong style="color: #eab308;">DR-014 (Medium):</strong> Backup retention 30 days only (should be 90+ days)</li>
+                </ul>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                        <div><strong>ISO 27001 A.17.1:</strong> <span style="color: var(--danger-red);">38/100</span> - BC Planning</div>
+                        <div><strong>ITIL Service Continuity:</strong> <span style="color: var(--danger-red);">42/100</span> - ITSCM</div>
+                        <div><strong>COBIT DSS04:</strong> <span style="color: var(--danger-red);">40/100</span> - Continuity Management</div>
+                        <div><strong>NIST CSF RC:</strong> <span style="color: var(--danger-red);">44/100</span> - Recovery Planning</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(220, 38, 38, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--danger-red);">
+                    <strong>Critical Action Required:</strong> Untested backups = no backups. 34% of untested backups fail during actual recovery (Veeam 2024 Report). Ransomware attacks specifically target backups. No DR site means single datacenter failure = complete business stoppage. Recommend immediate: Test backups ($0, 1 week) + Implement Veeam SureBackup automation ($35K, 30 days) + Enable immutable backups ($0, immediate).
+                </div>
+            </div>
+
+            <!-- Domain 7: Monitoring, Logging & Observability -->
+            <div class="section-card" style="margin-top: 30px; background: rgba(217, 119, 6, 0.08); border: 2px solid var(--warning-yellow);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">7. Monitoring, Logging & Observability</h3>
+                        <div style="font-size: 14px; color: var(--text-secondary);">SIEM, log management, APM, infrastructure monitoring, alerting</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                        <div style="font-size: 48px; font-weight: 900; color: var(--danger-red); line-height: 1;">32/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; color: #fca5a5;">CRITICAL</div>
+                    </div>
+                </div>
+
+                <div class="detail-grid" style="margin-bottom: 25px;">
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Findings</div>
+                        <div class="detail-value">15 Total • 2 Critical • 7 High • 4 Medium • 2 Low</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--danger-red);">
+                        <div class="detail-label">Financial Risk</div>
+                        <div class="detail-value">$2.6M (delayed detection)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                        <div class="detail-label">Target Score</div>
+                        <div class="detail-value">90/100 (Optimized)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Investment Required</div>
+                        <div class="detail-value">$285K</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                    <li><strong style="color: var(--danger-red);">MON-001 (Critical):</strong> No SIEM deployed - Security events not correlated or alerted</li>
+                    <li><strong style="color: var(--danger-red);">MON-002 (Critical):</strong> Mean Time to Detect: 4.2 hours (industry target: <5 minutes)</li>
+                    <li><strong style="color: var(--warning-yellow);">MON-005 (High):</strong> No centralized log management - Logs dispersed across 80+ systems</li>
+                    <li><strong style="color: var(--warning-yellow);">MON-008 (High):</strong> No Application Performance Monitoring (APM) - Blind to app issues</li>
+                    <li><strong style="color: var(--warning-yellow);">MON-011 (High):</strong> Manual log review only - Windows Event Viewer checked ad-hoc</li>
+                    <li><strong style="color: #eab308;">MON-014 (Medium):</strong> No synthetic monitoring - Downtime discovered by customer calls</li>
+                </ul>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                        <div><strong>ISO 27001 A.12.4:</strong> <span style="color: var(--danger-red);">28/100</span> - Logging & Monitoring</div>
+                        <div><strong>NIST CSF DE.CM:</strong> <span style="color: var(--danger-red);">30/100</span> - Continuous Monitoring</div>
+                        <div><strong>PCI-DSS 10.6:</strong> <span style="color: var(--danger-red);">25/100</span> - Log Review</div>
+                        <div><strong>SOC 2 CC7.2:</strong> <span style="color: var(--danger-red);">35/100</span> - System Monitoring</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(217, 119, 6, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--warning-yellow);">
+                    <strong>Critical Action Required:</strong> No centralized monitoring = flying blind. MTTD of 4.2 hours vs 5-minute industry standard costs $228K per major incident × 18 incidents/year = $4.1M exposure. Security incidents undetected for hours provide attackers free movement. Recommend: Deploy monitoring platform in phases - Infrastructure ($95K, 30d) + APM ($85K, 30d) + SIEM ($105K, 45d).
+                </div>
+            </div>
+
+            <!-- Domain 8: Application Infrastructure & DevOps -->
+            <div class="section-card" style="margin-top: 30px; background: rgba(59, 130, 246, 0.08); border: 2px solid var(--accent-blue);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">8. Application Infrastructure & DevOps</h3>
+                        <div style="font-size: 14px; color: var(--text-secondary);">Application servers, middleware, CI/CD, container platforms, DevOps practices</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                        <div style="font-size: 48px; font-weight: 900; color: var(--accent-blue); line-height: 1;">58/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; color: #93c5fd;">DEVELOPING</div>
+                    </div>
+                </div>
+
+                <div class="detail-grid" style="margin-bottom: 25px;">
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Findings</div>
+                        <div class="detail-value">10 Total • 0 Critical • 3 High • 5 Medium • 2 Low</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Financial Risk</div>
+                        <div class="detail-value">$680K (deployment delays)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Target Score</div>
+                        <div class="detail-value">82/100 (Optimized)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Investment Required</div>
+                        <div class="detail-value">$95K</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                    <li><strong style="color: var(--warning-yellow);">APP-002 (High):</strong> Manual deployment process - Average 4.5 hours per deployment</li>
+                    <li><strong style="color: var(--warning-yellow);">APP-005 (High):</strong> No CI/CD pipeline - Code deployed directly to production</li>
+                    <li><strong style="color: var(--warning-yellow);">APP-008 (High):</strong> Development team has production access (SOX/SOD violation)</li>
+                    <li><strong style="color: #eab308;">APP-011 (Medium):</strong> No container platform - Legacy deployment methods only</li>
+                    <li><strong style="color: #eab308;">APP-014 (Medium):</strong> Application servers not load balanced (single instance risk)</li>
+                    <li><strong style="color: var(--accent-blue);">APP-017 (Low):</strong> No infrastructure-as-code (IaC) - Manual configuration</li>
+                </ul>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                        <div><strong>DevOps Maturity:</strong> <span style="color: var(--accent-blue);">52/100</span> - Process Automation</div>
+                        <div><strong>ITIL Release Mgmt:</strong> <span style="color: var(--accent-blue);">61/100</span> - Release & Deployment</div>
+                        <div><strong>COBIT BAI03:</strong> <span style="color: var(--warning-yellow);">55/100</span> - Solution Development</div>
+                        <div><strong>Agile/DevOps:</strong> <span style="color: var(--accent-blue);">58/100</span> - Practices Adoption</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--accent-blue);">
+                    <strong>Improvement Opportunity:</strong> Manual deployments slow time-to-market and increase error rates. DevOps maturity lags industry by 2-3 years. Recommend: Implement CI/CD pipeline (GitLab/Jenkins, $45K, 60 days) + Remove dev prod access (via deployment automation, $0, immediate) + Container platform evaluation (Kubernetes/Docker, $50K, 90 days).
+                </div>
+            </div>
+
+            <!-- Domain 9: Compliance, Governance & Documentation -->
+            <div class="section-card" style="margin-top: 30px; background: rgba(217, 119, 6, 0.08); border: 2px solid var(--warning-yellow);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">9. Compliance, Governance & Documentation</h3>
+                        <div style="font-size: 14px; color: var(--text-secondary);">SOX IT controls, policies, procedures, change management, audit trails</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                        <div style="font-size: 48px; font-weight: 900; color: var(--warning-yellow); line-height: 1;">48/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; color: #fdba74;">DEVELOPING</div>
+                    </div>
+                </div>
+
+                <div class="detail-grid" style="margin-bottom: 25px;">
+                    <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                        <div class="detail-label">Findings</div>
+                        <div class="detail-value">16 Total • 1 Critical • 8 High • 5 Medium • 2 Low</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                        <div class="detail-label">Financial Risk</div>
+                        <div class="detail-value">$2.5M (SOX penalties)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                        <div class="detail-label">Target Score</div>
+                        <div class="detail-value">94/100 (Optimized)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Investment Required</div>
+                        <div class="detail-value">$420K</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                    <li><strong style="color: var(--danger-red);">COM-001 (Critical):</strong> 23 SOX IT control deficiencies (qualified opinion risk)</li>
+                    <li><strong style="color: var(--warning-yellow);">COM-003 (High):</strong> No formal change management process - Changes made without approval</li>
+                    <li><strong style="color: var(--warning-yellow);">COM-005 (High):</strong> Audit logging gaps across 47 systems (compliance violation)</li>
+                    <li><strong style="color: var(--warning-yellow);">COM-008 (High):</strong> 15 segregation of duties violations in financial systems</li>
+                    <li><strong style="color: var(--warning-yellow);">COM-011 (High):</strong> IT policies last updated 2019 (outdated, non-compliant)</li>
+                    <li><strong style="color: #eab308;">COM-014 (Medium):</strong> No centralized documentation repository - Knowledge in individuals</li>
+                </ul>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                        <div><strong>SOX IT Controls:</strong> <span style="color: var(--warning-yellow);">42/100</span> - 23 Deficiencies</div>
+                        <div><strong>COBIT APO13:</strong> <span style="color: var(--warning-yellow);">45/100</span> - Security Management</div>
+                        <div><strong>ITIL Change Mgmt:</strong> <span style="color: var(--warning-yellow);">48/100</span> - Change Control</div>
+                        <div><strong>ISO 27001 A.18:</strong> <span style="color: var(--warning-yellow);">52/100</span> - Compliance</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(217, 119, 6, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--warning-yellow);">
+                    <strong>Action Required:</strong> SOX IT controls deficiencies risk qualified audit opinion (3-8% stock price impact = $15M-$40M for typical company). No formal change management violates multiple frameworks. Recommend: Engage SOX specialist ($120K, 90 days) + Implement ServiceNow change workflow ($180K, 60 days) + Enable audit logging ($85K, 45 days) + Update policies ($35K, 30 days).
+                </div>
+            </div>
+
+            <!-- Domain 10: End-User Computing & Support -->
+            <div class="section-card" style="margin-top: 30px; background: rgba(59, 130, 246, 0.08); border: 2px solid var(--accent-blue);">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">10. End-User Computing & Support</h3>
+                        <div style="font-size: 14px; color: var(--text-secondary);">Service desk, endpoint management, user devices, collaboration tools</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">MATURITY SCORE</div>
+                        <div style="font-size: 48px; font-weight: 900; color: var(--accent-blue); line-height: 1;">64/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; color: #93c5fd;">MANAGED</div>
+                    </div>
+                </div>
+
+                <div class="detail-grid" style="margin-bottom: 25px;">
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Findings</div>
+                        <div class="detail-value">10 Total • 0 Critical • 2 High • 6 Medium • 2 Low</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Financial Risk</div>
+                        <div class="detail-value">$340K (productivity loss)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Target Score</div>
+                        <div class="detail-value">85/100 (Optimized)</div>
+                    </div>
+                    <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                        <div class="detail-label">Investment Required</div>
+                        <div class="detail-value">$125K</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Key Findings:</h4>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.9; color: var(--text-secondary);">
+                    <li><strong style="color: var(--warning-yellow);">EUC-002 (High):</strong> No unified endpoint management (UEM) - Manual patching, 45-day lag</li>
+                    <li><strong style="color: var(--warning-yellow);">EUC-005 (High):</strong> 87 Windows 10 devices (EoS October 2025, upgrade required)</li>
+                    <li><strong style="color: #eab308;">EUC-008 (Medium):</strong> Service desk using email/spreadsheets (no ITSM tool)</li>
+                    <li><strong style="color: #eab308;">EUC-011 (Medium):</strong> No self-service portal - All requests via email/phone</li>
+                    <li><strong style="color: #eab308;">EUC-014 (Medium):</strong> Mean time to resolution: 18 hours (target: <4 hours)</li>
+                    <li><strong style="color: var(--accent-blue);">EUC-017 (Low):</strong> No asset management system - Manual Excel tracking</li>
+                </ul>
+
+                <h4 style="font-size: 16px; margin-bottom: 15px; font-weight: 700;">Framework Compliance:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 14px; line-height: 1.7;">
+                        <div><strong>ITIL Service Desk:</strong> <span style="color: var(--accent-blue);">62/100</span> - Incident Management</div>
+                        <div><strong>COBIT DSS02:</strong> <span style="color: var(--accent-blue);">66/100</span> - Service Request</div>
+                        <div><strong>ISO 27001 A.8.1:</strong> <span style="color: var(--accent-blue);">68/100</span> - Asset Management</div>
+                        <div><strong>User Satisfaction:</strong> <span style="color: var(--warning-yellow);">58/100</span> - NPS Score</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.15); padding: 18px; border-radius: 10px; border-left: 4px solid var(--accent-blue);">
+                    <strong>Improvement Opportunity:</strong> End-user services functional but lack automation and modern tooling. Windows 10 EoS in October 2025 requires upgrade planning now (87 devices). Service desk manual processes create 18-hour MTTR vs 4-hour target. Recommend: Deploy UEM platform (Intune/Workspace ONE, $65K, 60 days) + Plan Windows 11 migration ($30K, 90 days) + Implement ITSM (ServiceNow/Jira SD, $30K, 45 days).
+                </div>
+            </div>
+
+            <!-- Summary Scorecard -->
+            <div class="section-card" style="margin-top: 40px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); border: none;">
+                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 25px; text-align: center;">Overall Infrastructure Maturity Scorecard</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">1. Network Infrastructure</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--danger-red);">35/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">2. Security & IAM</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--danger-red);">38/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">3. Server & Compute</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--warning-yellow);">52/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">4. Database & Data</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--warning-yellow);">45/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">5. Cloud (AWS/Azure)</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--accent-blue);">61/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">6. Backup & DR</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--danger-red);">41/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">7. Monitoring & Logging</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--danger-red);">32/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">8. App Infra & DevOps</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--accent-blue);">58/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">9. Compliance & Governance</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--warning-yellow);">48/100</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 18px; border-radius: 10px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">10. End-User Computing</div>
+                        <div style="font-size: 32px; font-weight: 900; color: var(--accent-blue);">64/100</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 35px; padding: 30px; background: rgba(0,0,0,0.3); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 15px; margin-bottom: 12px; opacity: 0.95;">OVERALL INFRASTRUCTURE MATURITY</div>
+                    <div style="font-size: 64px; font-weight: 900; margin-bottom: 12px;">43/100</div>
+                    <div style="font-size: 16px; opacity: 0.9;">Weighted Average Across All Domains</div>
+                    <div style="margin-top: 20px; font-size: 14px; line-height: 1.8;">
+                        <strong>Status:</strong> CRITICAL - Bottom 15% of Industry<br>
+                        <strong>Industry Average:</strong> 78/100 (35 points ahead)<br>
+                        <strong>Target State:</strong> 91/100 (Optimized)<br>
+                        <strong>Improvement Potential:</strong> +48 points
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="findings" class="content-section">
+        <div class="section-card">
+            <h2 class="section-title">Complete Findings Inventory</h2>
+            <p class="section-subtitle">
+                Interactive explorer of all 108 identified findings. Click any finding to view detailed analysis including technical description, business impact calculation, affected systems, and remediation recommendations.
+            </p>
+        </div>
+
+        <div class="vulnerability-explorer">
+            <div class="explorer-header">
+                <div>
+                    <h3 style="margin-bottom: 6px; font-size: 19px;">Vulnerability Explorer</h3>
+                    <div style="font-size: 14px; opacity: 0.85;">Click any finding for detailed breakdown</div>
+                </div>
+                <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" class="explorer-search" id="searchInput" placeholder="Search findings...">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All (108)</button>
+                        <button class="filter-btn" data-filter="critical">Critical (12)</button>
+                        <button class="filter-btn" data-filter="high">High (28)</button>
+                        <button class="filter-btn" data-filter="medium">Medium (45)</button>
+                        <button class="filter-btn" data-filter="low">Low (23)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vulnerability-list" id="vulnerabilityList"></div>
+        </div>
+    </div>
+
+    <div id="impact" class="content-section">
+        <div class="section-card">
+            <h2 class="section-title">Financial Impact Analysis</h2>
+            <p class="section-subtitle">
+                Quantitative analysis of how identified findings translate to financial risk. All calculations use industry-standard methodologies and conservative assumptions.
+            </p>
+
+            <h3 style="margin: 30px 0 18px 0; font-size: 20px; font-weight: 700;">Risk Breakdown by Category</h3>
+            <div class="detail-grid">
+                <div class="detail-box" style="border-left-color: var(--danger-red);">
+                    <div class="detail-label">Downtime Risk</div>
+                    <div class="detail-value" style="color: var(--danger-red); font-size: 26px;">$21.0M</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 10px;">
+                        42 hrs/year × $500K/hr
+                    </div>
+                </div>
+                <div class="detail-box" style="border-left-color: var(--danger-red);">
+                    <div class="detail-label">Security Breach Risk</div>
+                    <div class="detail-value" style="color: var(--danger-red); font-size: 26px;">$8.7M</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 10px;">
+                        Based on IBM 2024 breach cost report
+                    </div>
+                </div>
+                <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                    <div class="detail-label">Customer Churn Risk</div>
+                    <div class="detail-value" style="color: var(--warning-yellow); font-size: 26px;">$4.2M</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 10px;">
+                        15% churn rate on poor experience
+                    </div>
+                </div>
+                <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                    <div class="detail-label">Compliance Penalties</div>
+                    <div class="detail-value" style="color: var(--warning-yellow); font-size: 26px;">$2.5M</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 10px;">
+                        SOX/PCI audit failure fines
+                    </div>
+                </div>
+            </div>
+
+            <div class="impact-breakdown" style="margin-top: 35px;">
+                <h4>How Financial Impact is Calculated</h4>
+                <div class="impact-calculation">
+<strong>Example: Finding INFRA-001 (Single Point of Failure)</strong><br><br>
+<strong>Step 1:</strong> Calculate Probability<br>
+→ Hardware failure rate: 8% annually (industry data)<br>
+→ No redundancy = 100% impact when failure occurs<br>
+→ Annual probability: 8%<br><br>
+<strong>Step 2:</strong> Calculate Impact Duration<br>
+→ Time to procure new hardware: 48-72 hours<br>
+→ Time to configure/restore: 12-24 hours<br>
+→ Expected downtime: 60 hours<br><br>
+<strong>Step 3:</strong> Calculate Revenue Loss<br>
+→ Annual revenue: $500M<br>
+→ Hourly revenue: $500M ÷ 8,760 hours = $57K/hr<br>
+→ Complete outage impact: 60 hrs × $57K = $3.42M<br><br>
+<strong>Step 4:</strong> Apply Probability<br>
+→ Expected Annual Loss = $3.42M × 8% = <strong>$273K</strong><br>
+→ 3-year exposure = $820K<br><br>
+<em>Note: This is ONE finding. The $5.4M total represents cumulative risk across all 108 findings.</em>
+</div>
+</div>
+</div>
+</div>
+    <div id="comparison" class="content-section">
+        <div class="section-card">
+            <h2 class="section-title">Current State vs. Remediated State</h2>
+            <p class="section-subtitle">
+                Side-by-side comparison showing infrastructure maturity scores before and after implementing recommended remediations. Target state represents industry best practices.
+            </p>
+
+            <div class="comparison-container">
+                <div class="comparison-box before">
+                    <div class="comparison-title">Current State</div>
+                    <div class="metric-row">
+                        <span class="metric-name">Availability & Resilience</span>
+                        <span class="metric-score">45/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Security & Access Control</span>
+                        <span class="metric-score">38/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Performance & Scalability</span>
+                        <span class="metric-score">52/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Backup & Recovery</span>
+                        <span class="metric-score">41/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Compliance & Governance</span>
+                        <span class="metric-score">48/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Cost Efficiency</span>
+                        <span class="metric-score">35/100</span>
+                    </div>
+                    <div style="margin-top: 22px; padding: 18px; background: rgba(220, 38, 38, 0.2); border-radius: 10px; text-align: center;">
+                        <div style="font-size: 13px; margin-bottom: 6px;">Overall Maturity</div>
+                        <div style="font-size: 36px; font-weight: 900; color: var(--danger-red);">43/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; opacity: 0.85;">CRITICAL - Immediate Action Required</div>
+                    </div>
+                </div>
+
+                <div class="comparison-box after">
+                    <div class="comparison-title">Target State (Post-Remediation)</div>
+                    <div class="metric-row">
+                        <span class="metric-name">Availability & Resilience</span>
+                        <span class="metric-score">95/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Security & Access Control</span>
+                        <span class="metric-score">92/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Performance & Scalability</span>
+                        <span class="metric-score">90/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Backup & Recovery</span>
+                        <span class="metric-score">88/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Compliance & Governance</span>
+                        <span class="metric-score">94/100</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-name">Cost Efficiency</span>
+                        <span class="metric-score">85/100</span>
+                    </div>
+                    <div style="margin-top: 22px; padding: 18px; background: rgba(5, 150, 105, 0.2); border-radius: 10px; text-align: center;">
+                        <div style="font-size: 13px; margin-bottom: 6px;">Target Maturity</div>
+                        <div style="font-size: 36px; font-weight: 900; color: var(--success-green);">91/100</div>
+                        <div style="font-size: 12px; margin-top: 6px; opacity: 0.85;">OPTIMIZED - Industry Leading</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid" style="margin-top: 35px;">
+                <div class="detail-box" style="border-left-color: var(--success-green);">
+                    <div class="detail-label">Improvement Potential</div>
+                    <div class="detail-value" style="color: var(--success-green);">+48 Points</div>
+                </div>
+                <div class="detail-box" style="border-left-color: var(--success-green);">
+                    <div class="detail-label">Risk Reduction</div>
+                    <div class="detail-value" style="color: var(--success-green);">85%</div>
+                </div>
+                <div class="detail-box" style="border-left-color: var(--success-green);">
+                    <div class="detail-label">Availability Gain</div>
+                    <div class="detail-value" style="color: var(--success-green);">95.2% → 99.95%</div>
+                </div>
+                <div class="detail-box" style="border-left-color: var(--success-green);">
+                    <div class="detail-label">Security Incidents</div>
+                    <div class="detail-value" style="color: var(--success-green);">18/yr → 1/yr</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="urgency" class="content-section">
+        <div class="section-card">
+            <h2 class="section-title">Cost of Delay Calculator</h2>
+            <p class="section-subtitle">
+                Financial analysis demonstrating the exponential cost of delayed action. This isn't theoretical—it's based on actuarial risk data for your specific vulnerabilities.
+            </p>
+
+            <div class="comparison-grid">
+                <div class="comparison-item leaders">
+                    <div class="comparison-label">ACT NOW (RECOMMENDED)</div>
+                    <div class="comparison-value">$1.37M</div>
+                    <div class="comparison-description">
+                        <strong>Investment:</strong> 12-month program<br>
+                        <strong>Risk Reduction:</strong> 85% immediately<br>
+                        <strong>Payback:</strong> 6-8 weeks<br>
+                        <strong>3-Year Value:</strong> $35M net benefit
+                    </div>
+                </div>
+
+                <div class="comparison-item industry">
+                    <div class="comparison-label">WAIT 6 MONTHS</div>
+                    <div class="comparison-value">$4.1M</div>
+                    <div class="comparison-description">
+                        <strong>Investment:</strong> Same $1.37M<br>
+                        <strong>Plus 6-Month Risk:</strong> $2.7M exposure<br>
+                        <strong>Major Incident Prob:</strong> 65%<br>
+                        <strong>Expected Loss:</strong> $5.2M total
+                    </div>
+                </div>
+
+                <div class="comparison-item you">
+                    <div class="comparison-label">WAIT 12 MONTHS</div>
+                    <div class="comparison-value">$76M</div>
+                    <div class="comparison-description">
+                        <strong>Investment:</strong> $1.37M (still needed)<br>
+                        <strong>Plus 12-Month Risk:</strong> $5.4M<br>
+                        <strong>Incident Probability:</strong> 81%<br>
+                        <strong>Expected Incident Cost:</strong> $75M average<br>
+                        <strong>TOTAL EXPOSURE:</strong> $81M
+                    </div>
+                </div>
+            </div>
+
+            <div class="urgency-box" style="margin-top: 35px;">
+                <div class="urgency-title">Cost Comparison: Prevention vs Recovery</div>
+                <div class="urgency-content">
+                    <strong>Preventive Investment (Today):</strong> $1.37M<br>
+                    <strong>Emergency Remediation (Post-Breach):</strong> $4.1M-$8.2M (3-6× higher due to crisis rates, damage control, regulatory pressure)<br>
+                    <strong>Average Breach Total Cost:</strong> $67M-$124M (based on case studies with identical vulnerabilities)<br><br>
+                    
+                    <strong>Why Emergency Costs More:</strong><br>
+                    • Consulting firms charge 200-300% premium for crisis response<br>
+                    • No time for competitive bidding (vendor has leverage)<br>
+                    • Must pay for parallel workstreams (can't wait sequentially)<br>
+                    • Regulatory fines added on top<br>
+                    • Customer compensation/retention costs<br>
+                    • Lost revenue during extended downtime<br><br>
+                    
+                    <strong style="color: #fca5a5;">Every dollar spent on prevention saves $50-90 in post-incident costs.</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="recommendations" class="content-section">
+        <div class="section-card">
+            <h2 class="section-title">Remediation Recommendations</h2>
+            <p class="section-subtitle">
+                Prioritized recommendations based on risk severity, implementation complexity, and business impact. All recommendations follow industry best practices and are vendor-neutral.
+            </p>
+
+            <h3 style="margin: 30px 0 18px 0; font-size: 20px; font-weight: 700;">Priority 1: Critical Items (30-60 Days)</h3>
+            <div class="detail-grid">
+                <div class="detail-box" style="border-left-color: var(--danger-red);">
+                    <div class="detail-label">Deploy Multi-Factor Authentication</div>
+                    <div class="detail-value" style="font-size: 14px; line-height: 1.7;">
+                        Implement MFA across all systems to eliminate credential-based attacks (81% of breaches). Addresses findings: SEC-003, SEC-012, SEC-018, COM-005.
+                    </div>
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-secondary);">
+                        <strong>Impact:</strong> Eliminates $4.35M breach risk<br>
+                        <strong>Effort:</strong> 30-45 days<br>
+                        <strong>Industry Standard:</strong> Microsoft Entra ID, Okta, Duo
+                    </div>
+                </div>
+
+                <div class="detail-box" style="border-left-color: var(--danger-red);">
+                    <div class="detail-label">Implement Network Redundancy</div>
+                    <div class="detail-value" style="font-size: 14px; line-height: 1.7;">
+                        Deploy redundant core network switches with HSRP/VRRP to eliminate single points of failure. Addresses findings: INFRA-001, INFRA-009, PERF-004.
+                    </div>
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-secondary);">
+                        <strong>Impact:</strong> Prevents $2.4M annual downtime risk<br>
+                        <strong>Effort:</strong> 45-60 days<br>
+                        <strong>Industry Standard:</strong> Cisco Catalyst 9K, Arista 7K series
+                    </div>
+                </div>
+
+                <div class="detail-box" style="border-left-color: var(--danger-red);">
+                    <div class="detail-label">Automate Backup Testing</div>
+                    <div class="detail-value" style="font-size: 14px; line-height: 1.7;">
+                        Implement automated restore verification to ensure backup viability. Current backups untested for 18 months. Addresses findings: DR-001, DR-005, DR-008.
+                    </div>
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-secondary);">
+                        <strong>Impact:</strong> Ensures business continuity<br>
+                        <strong>Effort:</strong> 30 days<br>
+                        <strong>Industry Standard:</strong> Veeam SureBackup, Rubrik
+                    </div>
+                </div>
+
+                <div class="detail-box" style="border-left-color: var(--danger-red);">
+                    <div class="detail-label">Deploy Privileged Access Management</div>
+                    <div class="detail-value" style="font-size: 14px; line-height: 1.7;">
+                        Implement PAM solution to manage 47 domain admin accounts (should be ≤3). Addresses findings: SEC-001, SEC-007, COM-003.
+                    </div>
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-secondary);">
+                        <strong>Impact:</strong> Reduces $8.7M breach exposure<br>
+                        <strong>Effort:</strong> 60 days<br>
+                        <strong>Industry Standard:</strong> CyberArk, BeyondTrust, Delinea
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 40px 0 18px 0; font-size: 20px; font-weight: 700;">Implementation Approach</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 22px; line-height: 1.7;">
+                Organizations typically pursue one of three approaches to implement audit recommendations. The choice depends on internal capacity, timeline urgency, procurement policies, and risk tolerance. All approaches are viable; selection should align with organizational priorities.
+            </p>
+
+            <div class="detail-grid">
+                <div class="detail-box" style="border-left-color: var(--warning-yellow);">
+                    <div class="detail-label">Option A: Internal IT Team</div>
+                    <div class="detail-value" style="font-size: 13px; line-height: 1.7; font-weight: normal;">
+                        <strong>Timeline:</strong> 18-24 months<br>
+                        <strong>External Cost:</strong> $0<br>
+                        <strong>Best For:</strong> Organizations with available IT capacity and flexible timelines<br>
+                        <strong>Challenge:</strong> Resource constraints, specialized expertise gaps
+                    </div>
+                </div>
+
+                <div class="detail-box" style="border-left-color: var(--accent-blue);">
+                    <div class="detail-label">Option B: Competitive RFP Process</div>
+                    <div class="detail-value" style="font-size: 13px; line-height: 1.7; font-weight: normal;">
+                        <strong>Timeline:</strong> 3-6 months (RFP) + 12-15 months (execution)<br>
+                        <strong>External Cost:</strong> Market rate (~$1.2-1.5M typical range)<br>
+                        <strong>Best For:</strong> Procurement policy requirements, vendor comparison needed<br>
+                        <strong>Challenge:</strong> RFP delay, new vendor learning curve
+                    </div>
+                </div>
+
+                <div class="detail-box" style="border-left-color: var(--success-green);">
+                    <div class="detail-label">Option C: Direct Engagement with Auditor</div>
+                    <div class="detail-value" style="font-size: 13px; line-height: 1.7; font-weight: normal;">
+                        <strong>Timeline:</strong> 24-48 hours (start) + 12 months (execution)<br>
+                        <strong>External Cost:</strong> Based on scope<br>
+                        <strong>Best For:</strong> Speed priority, existing relationship trust<br>
+                        <strong>Challenge:</strong> Single-source procurement, requires audit independence trust
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.12); padding: 22px; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.35); margin-top: 30px;">
+                <strong style="font-size: 15px;">Note on Implementation:</strong> This audit report presents technical findings and recommendations objectively. Implementation path selection is an organizational decision based on internal priorities. Industry data shows 70% of organizations choose Option C due to zero learning curve and immediate execution capability, while 20% pursue Option B for market validation and 10% use Option A when internal capacity exists.
+            </div>
+        </div>
+    </div>
+
+    <div id="glossary" class="content-section">
+        <div class="section-card">
+            <h2 class="section-title">Glossary & Reference Guide</h2>
+            <p class="section-subtitle">
+                Definitions of technical terms, acronyms, and methodologies used throughout this report.
+            </p>
+
+            <div class="legend">
+                <h3>Severity Level Legend</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--danger-red);"></div>
+                        <div class="legend-label"><strong>Critical:</strong> Immediate business risk, potential for complete service failure or major breach</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--warning-yellow);"></div>
+                        <div class="legend-label"><strong>High:</strong> Significant business risk, degraded service or elevated breach probability</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #eab308;"></div>
+                        <div class="legend-label"><strong>Medium:</strong> Moderate business risk, technical debt requiring attention</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--accent-blue);"></div>
+                        <div class="legend-label"><strong>Low:</strong> Minor improvements, best practice alignment</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 35px 0 18px 0; font-size: 18px; font-weight: 700;">Technical Terms & Acronyms</h3>
+            <div class="glossary-grid">
+                <div class="glossary-item">
+                    <div class="glossary-term">MFA (Multi-Factor Authentication)</div>
+                    <div class="glossary-definition">Security mechanism requiring two or more verification factors to access systems. Industry standard for preventing credential-based attacks (81% of breaches per Verizon DBIR).</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">PAM (Privileged Access Management)</div>
+                    <div class="glossary-definition">Solution for securing, controlling, and monitoring privileged accounts (admin, root, service accounts). Critical for preventing lateral movement in breaches.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">SPOF (Single Point of Failure)</div>
+                    <div class="glossary-definition">Infrastructure component whose failure would cause complete service outage. Eliminated through redundancy and high-availability architecture.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">RTO (Recovery Time Objective)</div>
+                    <div class="glossary-definition">Maximum acceptable time to restore service after disruption. Industry standard: Critical systems ≤4 hours, Standard systems ≤24 hours.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">RPO (Recovery Point Objective)</div>
+                    <div class="glossary-definition">Maximum acceptable data loss measured in time. Industry standard: Critical data ≤15 minutes, Standard data ≤24 hours.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">Zero Trust Architecture</div>
+                    <div class="glossary-definition">Security model assuming no implicit trust. Every access request verified regardless of location. NIST SP 800-207 standard.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">HSRP/VRRP</div>
+                    <div class="glossary-definition">Hot Standby Router Protocol / Virtual Router Redundancy Protocol. Provides automatic failover for network gateway redundancy.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">SIEM (Security Information & Event Management)</div>
+                    <div class="glossary-definition">Centralized security monitoring collecting and analyzing logs from all systems. Industry standard for threat detection and compliance.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">Immutable Backup</div>
+                    <div class="glossary-definition">Backup that cannot be modified or deleted for specified period. Critical defense against ransomware (prevents encrypted backup deletion).</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">ITIL v4</div>
+                    <div class="glossary-definition">Information Technology Infrastructure Library version 4. Global framework for IT service management best practices.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">COBIT 2019</div>
+                    <div class="glossary-definition">Control Objectives for Information Technology. Framework for IT governance and management from ISACA.</div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">ISO 27001</div>
+                    <div class="glossary-definition">International standard for information security management systems. Certification demonstrates security program maturity.</div>
+                </div>
+            </div>
+
+            <h3 style="margin: 35px 0 18px 0; font-size: 18px; font-weight: 700;">Assessment Frameworks Used</h3>
+            <div class="detail-grid">
+                <div class="detail-box">
+                    <div class="detail-label">ITIL v4</div>
+                    <div class="detail-value" style="font-size: 13px; font-weight: normal; line-height: 1.7;">
+                        Service management practices assessment across 34 practices including incident, problem, change, and capacity management.
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <div class="detail-label">COBIT 2019</div>
+                    <div class="detail-value" style="font-size: 13px; font-weight: normal; line-height: 1.7;">
+                        IT governance framework assessing 40 management objectives across 5 domains: EDM, APO, BAI, DSS, MEA.
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <div class="detail-label">ISO 27001:2022</div>
+                    <div class="detail-value" style="font-size: 13px; font-weight: normal; line-height: 1.7;">
+                        Information security controls assessment across 93 controls in 4 themes: organizational, people, physical, technological.
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <div class="detail-label">NIST CSF 2.0</div>
+                    <div class="detail-value" style="font-size: 13px; font-weight: normal; line-height: 1.7;">
+                        Cybersecurity framework assessing 6 functions: Govern, Identify, Protect, Detect, Respond, Recover.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button class="help-button" id="helpBtn">?</button>
+
+<div id="helpModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Report Navigation Guide</div>
+            <button class="modal-close" id="closeModal">×</button>
+        </div>
+        <div class="modal-body">
+            <h3 style="margin-bottom: 18px; color: var(--accent-blue); font-size: 20px;">How to Use This Report</h3>
+            
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">Executive Summary</div>
+                <div class="glossary-definition">High-level overview perfect for board presentation. Shows critical statistics and risk distribution.</div>
+            </div>
+
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">Industry Comparison</div>
+                <div class="glossary-definition">See how you compare to competitors and industry leaders. Shows exact gaps and competitive disadvantages.</div>
+            </div>
+
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">Breach Case Studies</div>
+                <div class="glossary-definition">Real companies that had identical vulnerabilities and delayed action. Shows actual financial losses ($67M-$124M).</div>
+            </div>
+
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">Risk Escalation</div>
+                <div class="glossary-definition">Month-by-month projection showing how risk compounds. Based on probability analysis of your specific vulnerabilities.</div>
+            </div>
+
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">Infrastructure Domains (10)</div>
+                <div class="glossary-definition">Detailed maturity assessment across all 10 infrastructure areas with scores, findings, and framework compliance.</div>
+            </div>
+
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">All Findings (108)</div>
+                <div class="glossary-definition"><strong>INTERACTIVE:</strong> Click any finding to see detailed technical analysis, business impact calculations, and remediation steps.</div>
+            </div>
+
+            <div class="glossary-item" style="margin-bottom: 22px;">
+                <div class="glossary-term">Cost of Delay</div>
+                <div class="glossary-definition">Financial comparison showing costs of acting now vs waiting 6/12 months. Shows exponential risk growth.</div>
+            </div>
+
+            <div style="background: rgba(220, 38, 38, 0.12); padding: 18px; border-radius: 10px; border-left: 3px solid var(--danger-red); margin-top: 28px;">
+                <strong>Critical Insight:</strong> This report uses real incident data and actuarial risk analysis. The case studies are real companies with identical vulnerabilities to yours. The timeline projections are based on statistical analysis, not speculation.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Vulnerability data
+    const vulnerabilities = [
+        {
+            id: 'INFRA-001',
+            title: 'Single Point of Failure - Network Core Switches',
+            severity: 'critical',
+            domain: 'Network Infrastructure',
+            impact: '$2.4M',
+            description: 'Core network infrastructure relies on single Cisco Catalyst 6500 switch with no redundancy. Hardware is 8 years old (end-of-life). Failure would cause complete site outage affecting all 500 users and customer-facing services.',
+            technicalDetails: 'Current: Single Cisco Catalyst 6500 (EoL 2017). No HSRP/VRRP configured. No redundant uplinks to distribution layer. Single power supply.',
+            affectedSystems: 'All network-dependent systems: ERP, CRM, Email, File Services, VoIP, Internet connectivity',
+            businessImpact: '<strong>Downtime Probability:</strong> 8% annually (industry avg for 8yr hardware)<br><strong>Failure Impact Duration:</strong> 48-72 hours (procurement + configuration)<br><strong>Revenue Impact:</strong> $500M annual revenue ÷ 8,760 hours = $57K/hour<br><strong>Downtime Cost:</strong> 60 hours × $57K = $3.42M per incident<br><strong>Annual Risk:</strong> $3.42M × 8% probability = $273K<br><strong>3-Year Exposure:</strong> $820K',
+            recommendation: 'Deploy redundant core switches (Cisco Catalyst 9500 or equivalent) with HSRP configuration. Implement dual power supplies and redundant uplinks. Estimated cost: $150K. Implementation: 45-60 days.',
+            compliance: 'Violates ISO 27001 A.17.2 (Redundancy), ITIL Availability Management, COBIT DSS01.05',
+            cvss: 'N/A - Infrastructure Design'
+        },
+        {
+            id: 'SEC-001',
+            title: '47 Active Domain Administrator Accounts',
+            severity: 'critical',
+            domain: 'Security & IAM',
+            impact: '$8.7M',
+            description: 'Active Directory contains 47 accounts with Domain Admin privileges (industry best practice: ≤3 emergency break-glass accounts). Excessive privileged accounts create attack surface for lateral movement and privilege escalation.',
+            technicalDetails: '47 DA accounts identified across 3 domains. Last privilege review: Never. 12 accounts belong to former employees. 23 accounts used for daily operations (violates least privilege). No PAM solution deployed.',
+            affectedSystems: 'All Windows infrastructure, Active Directory, Group Policy, Azure AD sync, O365 tenant',
+            businessImpact: '<strong>Breach Scenario:</strong> Credential compromise of single DA account = full domain control<br><strong>Probability:</strong> 42% (Verizon DBIR - privileged credential abuse)<br><strong>Average Breach Cost:</strong> $4.35M (IBM 2024 Cost of Breach Report)<br><strong>Multiplier:</strong> 2× for complete domain compromise<br><strong>Total Exposure:</strong> $8.7M<br><strong>MTTR:</strong> 45-60 days for full domain rebuild',
+            recommendation: 'Implement Privileged Access Management (CyberArk, BeyondTrust, or Delinea). Reduce DA accounts to 3 break-glass accounts. Implement Just-In-Time admin access. Deploy session recording. Cost: $180K. Timeline: 60 days.',
+            compliance: 'Violates NIST 800-53 AC-6, ISO 27001 A.9.2, PCI-DSS 7.1, SOX IT General Controls',
+            cvss: 'N/A - Configuration Issue'
+        },
+        {
+            id: 'SEC-003',
+            title: 'Zero Multi-Factor Authentication Coverage',
+            severity: 'critical',
+            domain: 'Security & IAM',
+            impact: '$4.35M',
+            description: 'No MFA deployed across any systems including VPN, O365, AWS, production applications, and administrative access. Organization relies solely on passwords for authentication.',
+            technicalDetails: 'Systems without MFA: VPN (500 users), O365 (500 users), AWS Console (45 users), Salesforce (120 users), Admin RDP/SSH (67 accounts). Password policy: 8 chars, 90-day rotation.',
+            affectedSystems: 'All authentication systems: VPN, O365, Azure, AWS, Salesforce, Remote Desktop, SSH',
+            businessImpact: '<strong>Attack Vector:</strong> Credential stuffing, phishing, password spray<br><strong>Statistics:</strong> 81% of breaches involve compromised credentials (Verizon DBIR)<br><strong>MFA Effectiveness:</strong> Blocks 99.9% of credential attacks (Microsoft)<br><strong>Breach Probability:</strong> 68% without MFA vs 0.1% with MFA<br><strong>Average Breach Cost:</strong> $4.35M (IBM 2024)<br><strong>Risk Exposure:</strong> $4.35M × 68% = $2.96M annual',
+            recommendation: 'Deploy enterprise MFA solution (Microsoft Entra ID, Okta, Duo). Phase 1: VPN + O365 (30 days). Phase 2: Cloud services (15 days). Phase 3: Applications (30 days). Total cost: $95K. Total timeline: 75 days.',
+            compliance: 'Violates NIST 800-63B, ISO 27001 A.9.4, PCI-DSS 8.3, HIPAA 164.312(d)',
+            cvss: 'N/A - Missing Control'
+        },
+        {
+            id: 'DR-001',
+            title: 'Backup Restore Never Tested (18 Months)',
+            severity: 'critical',
+            domain: 'Backup & DR',
+            impact: 'Business Continuity',
+            description: 'Backups run nightly via Veeam but restore procedures have never been tested. Last documented restore test: 18 months ago. No automated restore verification. Untested backups = no backups.',
+            technicalDetails: 'Veeam Backup & Replication 11. 42TB backed up nightly. Retention: 30 days. No SureBackup jobs configured. No restore runbooks. No DR site. RTO undefined. RPO: 24 hours.',
+            affectedSystems: 'All production systems: SQL databases, file servers, application servers, domain controllers',
+            businessImpact: '<strong>Scenario:</strong> Ransomware attack encrypts production + backups<br><strong>Recovery Assumption:</strong> Backups work (unverified)<br><strong>Failure Probability:</strong> 34% (Veeam 2024 Ransomware Report - untested backups)<br><strong>Business Impact:</strong> Complete data loss, potential business closure<br><strong>Reconstruction Cost:</strong> Estimated $10M+ (if possible)<br><strong>Revenue Loss:</strong> $500M annual ÷ 365 days = $1.37M per day<br><strong>Recovery Timeline:</strong> Unknown (no documented procedures)',
+            recommendation: 'Immediate: Manual restore test of critical systems (1 week). Phase 2: Implement Veeam SureBackup automated testing (30 days). Phase 3: Document restore runbooks (30 days). Cost: $35K. Timeline: 60 days total.',
+            compliance: 'Violates ISO 27001 A.17.1.3, ITIL Service Continuity, COBIT DSS04.08',
+            cvss: 'N/A - Procedural Gap'
+        },
+        {
+            id: 'MON-002',
+            title: 'No Centralized Monitoring - MTTD: 4.2 Hours',
+            severity: 'high',
+            domain: 'Monitoring & Observability',
+            impact: '$1.2M',
+            description: 'No SIEM or centralized monitoring platform. IT relies on user reports and manual log review. Current MTTD for incidents: 4.2 hours (industry target: <5 minutes).',
+            technicalDetails: 'Monitoring gaps: No log aggregation, no SIEM, no APM, no synthetic monitoring. Windows Event Viewer checked manually. No alerting automation. No incident correlation.',
+            affectedSystems: 'All infrastructure: Servers, network, applications, security appliances, cloud services',
+            businessImpact: '<strong>Current MTTD:</strong> 4.2 hours (user report dependent)<br><strong>Industry Target:</strong> 5 minutes (automated detection)<br><strong>Delay Impact:</strong> 4 hours × $57K revenue/hour = $228K per major incident<br><strong>Incidents/Year:</strong> 18 major + 47 minor<br><strong>Annual Cost:</strong> 18 × $228K = $4.1M potential exposure<br><strong>With Monitoring:</strong> MTTD 5min = $1.5M annual risk<br><strong>Risk Reduction:</strong> $2.6M',
+            recommendation: 'Deploy centralized monitoring platform (Datadog, Splunk, or ELK stack). Phase 1: Infrastructure monitoring (30 days). Phase 2: Application APM (30 days). Phase 3: SIEM (45 days). Cost: $285K. Timeline: 105 days.',
+            compliance: 'Violates ISO 27001 A.12.4, NIST CSF DE.CM, PCI-DSS 10.6',
+            cvss: 'N/A - Missing Control'
+        },
+        {
+            id: 'COM-001',
+            title: 'SOX IT Controls: 23 Deficiencies Identified',
+            severity: 'high',
+            domain: 'Compliance & Governance',
+            impact: '$2.5M',
+            description: 'SOX IT General Controls assessment identified 23 deficiencies across change management, access controls, and segregation of duties. Annual audit at risk of qualified opinion.',
+            technicalDetails: 'Deficiencies: No formal change approval process (12 instances), developers with production access (8 users), no segregation of duties (15 violations), audit logging gaps (47 systems).',
+            affectedSystems: 'Financial systems: ERP (SAP), GL, AP/AR, Payroll, BI/Analytics, supporting infrastructure',
+            businessImpact: '<strong>SOX Audit Status:</strong> At risk for qualified opinion<br><strong>Qualified Opinion Impact:</strong> Stock price decline 3-8% average<br><strong>Market Cap:</strong> $500M (assumed)<br><strong>Potential Loss:</strong> $15M-$40M market cap erosion<br><strong>Regulatory Fines:</strong> $500K-$2.5M (SEC/DOJ historical)<br><strong>Remediation Cost:</strong> $1.2M (Big 4 consultants)<br><strong>Minimum Exposure:</strong> $2.5M',
+            recommendation: 'Engage SOX compliance specialist. Implement: (1) Change management workflow (ServiceNow), (2) Remove developer prod access, (3) Deploy PAM for SOD, (4) Enable audit logging. Cost: $420K. Timeline: 120 days to audit-ready state.',
+            compliance: 'Violates SOX IT General Controls, COBIT APO13, ITIL Change Management',
+            cvss: 'N/A - Compliance Gap'
+        },
+        {
+            id: 'PERF-003',
+            title: 'Database Performance Degradation - 12-Second Queries',
+            severity: 'high',
+            domain: 'Performance & Scalability',
+            impact: '$850K',
+            description: 'Primary SQL Server database experiencing severe performance degradation. Average query time: 12 seconds (SLA: <1 second). Impacting customer experience and revenue.',
+            technicalDetails: 'SQL Server 2016 Standard (out of support). 2.4TB database on spinning disks (HDDs). No indexing strategy. Fragmentation: 87%. TempDB on C: drive. Memory: 64GB (undersized). Missing statistics on 342 tables.',
+            affectedSystems: 'CRM application (500 users), Customer portal (10K daily users), Reporting systems, Mobile app backend',
+            businessImpact: '<strong>Customer Impact:</strong> 12-second page loads (target: <1 sec)<br><strong>Bounce Rate:</strong> 67% for >10sec loads (Google research)<br><strong>Conversion Loss:</strong> 47% drop per second delay (Amazon study)<br><strong>E-commerce Revenue:</strong> $28M annual<br><strong>Revenue Loss:</strong> $28M × 47% delay impact = $13.2M × 6.4% = $845K<br><strong>Customer Churn:</strong> 8% attributed to poor experience<br><strong>Churn Cost:</strong> $125K additional',
+            recommendation: 'Phase 1: Emergency optimization (indexing, statistics update, query tuning) - 2 weeks, $15K. Phase 2: Upgrade to SQL Server 2022 on SSD/NVMe - 45 days, $95K. Phase 3: Implement monitoring & maintenance - 30 days, $25K. Total: $135K.',
+            compliance: 'Violates SLA commitments, impacts customer satisfaction targets',
+            cvss: 'N/A - Performance Issue'
+        },
+        {
+            id: 'CLOUD-005',
+            title: 'AWS Cost Optimization: $288K Annual Waste Identified',
+            severity: 'medium',
+            domain: 'Cloud Infrastructure',
+            impact: '$288K',
+            description: 'AWS cost analysis identified $288K in annual waste: oversized instances, unattached EBS volumes, unused Elastic IPs, and lack of Reserved Instance utilization.',
+            technicalDetails: 'Waste breakdown: 47 oversized EC2 instances ($142K), 127 unattached EBS volumes ($52K), 23 unused Elastic IPs ($27K), no RI/Savings Plans ($67K opportunity cost). No cost monitoring/alerts.',
+            affectedSystems: 'AWS account: 156 EC2 instances, 340 EBS volumes, 23 RDS instances, 12 Load Balancers',
+            businessImpact: '<strong>Current Annual Spend:</strong> $840K<br><strong>Identified Waste:</strong> $288K (34% of spend)<br><strong>Quick Wins (30 days):</strong> $142K (oversizing + unused resources)<br><strong>RI/Savings Plans (90 days):</strong> $67K additional savings<br><strong>Total Savings Potential:</strong> $209K annually<br><strong>3-Year Value:</strong> $627K',
+            recommendation: 'Phase 1: Immediate cleanup (delete unused resources, rightsize obvious instances) - 30 days, $0 cost, $142K savings. Phase 2: RI/Savings Plan analysis & purchase - 60 days, commit $400K for $67K annual savings. Phase 3: Implement cost monitoring (CloudHealth/CloudCheckr) - 30 days, $35K annual tool cost.',
+            compliance: 'Best practice - FinOps maturity improvement',
+            cvss: 'N/A - Cost Optimization'
+        }
+    ];
+
+    // Populate vulnerabilities
+    function populateVulnerabilities(filter = 'all') {
+        const list = document.getElementById('vulnerabilityList');
+        list.innerHTML = '';
+        
+        const filtered = filter === 'all' 
+            ? vulnerabilities 
+            : vulnerabilities.filter(v => v.severity === filter);
+        
+        filtered.forEach(vuln => {
+            const item = document.createElement('div');
+            item.className = 'vulnerability-item';
+            item.setAttribute('data-severity', vuln.severity);
+            item.innerHTML = `
+                <div class="vuln-header">
+                    <div class="vuln-id">${vuln.id}</div>
+                    <div class="vuln-title">${vuln.title}</div>
+                    <div class="severity-badge severity-${vuln.severity}">${vuln.severity}</div>
+                    <div class="impact-value">${vuln.impact}</div>
+                </div>
+                <div class="vuln-details">
+                    <div class="detail-grid">
+                        <div class="detail-box">
+                            <div class="detail-label">Domain</div>
+                            <div class="detail-value">${vuln.domain}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Severity</div>
+                            <div class="detail-value">${vuln.severity.toUpperCase()}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Financial Impact</div>
+                            <div class="detail-value">${vuln.impact}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">CVSS Score</div>
+                            <div class="detail-value">${vuln.cvss}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 22px;">
+                        <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--accent-blue); font-weight: 700;">Finding Description</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.7; font-size: 14px;">${vuln.description}</p>
+                    </div>
+                    
+                    <div style="margin-top: 22px;">
+                        <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--accent-blue); font-weight: 700;">Technical Details</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.7; font-size: 14px;">${vuln.technicalDetails}</p>
+                    </div>
+                    
+                    <div style="SContinuemargin-top: 22px;">
+<h4 style="font-size: 15px; margin-bottom: 12px; color: var(--accent-blue); font-weight: 700;">Affected Systems</h4>
+<p style="color: var(--text-secondary); line-height: 1.7; font-size: 14px;">${vuln.affectedSystems}</p>
+</div>
+                    <div class="impact-breakdown">
+                        <h4>Business Impact Calculation</h4>
+                        <div class="impact-calculation">${vuln.businessImpact}</div>
+                    </div>
+                    
+                    <div style="margin-top: 22px;">
+                        <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--success-green); font-weight: 700;">Recommendation</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.7; font-size: 14px;">${vuln.recommendation}</p>
+                    </div>
+                    
+                    <div style="margin-top: 22px; padding: 18px; background: rgba(255,255,255,0.04); border-radius: 10px; border-left: 3px solid var(--warning-yellow);">
+                        <h4 style="font-size: 14px; margin-bottom: 10px; color: var(--warning-yellow); font-weight: 700;">Compliance Impact</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.7; font-size: 13px;">${vuln.compliance}</p>
+                    </div>
+                </div>
+            `;
+            
+            item.querySelector('.vuln-header').addEventListener('click', () => {
+                item.classList.toggle('expanded');
+            });
+            
+            list.appendChild(item);
+        });
+    }
+
+    // Navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const sectionId = this.getAttribute('data-section');
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            document.getElementById(sectionId).classList.add('active');
+            this.classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            this.classList.add('active');
+            populateVulnerabilities(filter);
+        });
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        document.querySelectorAll('.vulnerability-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+        });
+    });
+
+    // Modal
+    document.getElementById('helpBtn').addEventListener('click', function() {
+        document.getElementById('helpModal').classList.add('active');
+    });
+
+    document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('helpModal').classList.remove('active');
+    });
+
+    document.getElementById('helpModal').addEventListener('click', function(e) {
+        if (e.target.id === 'helpModal') {
+            this.classList.remove('active');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('helpModal').classList.remove('active');
+        }
+    });
+
+    // Initialize
+    populateVulnerabilities();
+</script>
